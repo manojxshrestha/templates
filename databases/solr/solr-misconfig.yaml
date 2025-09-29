@@ -1,0 +1,44 @@
+id: solr-misconfig
+info:
+  name: Apache Solr Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Apache Solr instances with accessible sensitive endpoints, potentially vulnerable to unauthorized data access.
+  tags: solr, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/admin/cores?indexInfo=false&wt=json"
+      - "{{BaseURL}}/solr/admin/cores?indexInfo=false&wt=json"
+      - "{{BaseURL}}:8983/admin/cores?indexInfo=false&wt=json"
+      - "{{BaseURL}}:8983/solr/admin/cores?indexInfo=false&wt=json"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Solr"
+          - "Apache Solr"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Solr"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

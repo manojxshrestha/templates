@@ -1,0 +1,49 @@
+id: joomla-misconfig
+info:
+  name: Joomla Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Joomla instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access or information disclosure (e.g., CVE-2023-23752).
+  tags: joomla, misconfiguration, cve
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/administrator/manifests/files/joomla.xml"
+      - "{{BaseURL}}/administrator"
+      - "{{BaseURL}}/api/index.php/v1/config/application?public=true"
+      - "{{BaseURL}}/api/index.php/v1/users?public=true"
+      - "{{BaseURL}}:8080/administrator/manifests/files/joomla.xml"
+      - "{{BaseURL}}:8080/administrator"
+      - "{{BaseURL}}:8080/api/index.php/v1/config/application?public=true"
+      - "{{BaseURL}}:8080/api/index.php/v1/users?public=true"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Joomla"
+          - "Joomla! CMS"
+          - "<extension version="
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Joomla"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

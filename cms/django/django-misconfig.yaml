@@ -1,0 +1,59 @@
+id: django-misconfig
+info:
+  name: Django Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Django instances with accessible admin interfaces or debug mode enabled, potentially vulnerable to information disclosure (e.g., CVE-2021-32052).
+  tags: django, misconfiguration, cve, debug
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/admin/"
+      - "{{BaseURL}}/"
+      - "{{BaseURL}}:8000/admin/"
+      - "{{BaseURL}}:8000/"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Django"
+          - "Django administration"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Page not found"
+          - "DEBUG = True"
+        part: body
+        condition: and
+        case-insensitive: true
+      - type: regex
+        name: disallowed-host
+        regex:
+          - "DisallowedHost at /"
+        part: title
+      - type: word
+        words:
+          - "Django"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 404
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

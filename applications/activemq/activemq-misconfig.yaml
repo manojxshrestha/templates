@@ -1,0 +1,82 @@
+id: activemq-misconfig
+info:
+  name: ActiveMQ Misconfiguration and Default Credentials
+  author: pwn
+  severity: high
+  description: Detects exposed Apache ActiveMQ instances with default credentials (admin:admin) or accessible sensitive endpoints, potentially vulnerable to unauthorized access or exploitation (e.g., CVE-2016-3088).
+  tags: activemq, misconfiguration, default-credentials, cve
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/admin/"
+      - "{{BaseURL}}/admin/browse.jsp?JMSDestination=event"
+      - "{{BaseURL}}/admin/index.jsp?printable=true"
+      - "{{BaseURL}}/admin/test/systemProperties.jsp"
+      - "{{BaseURL}}/api/jolokia/list"
+      - "{{BaseURL}}/api/jolokia/"
+      - "{{BaseURL}}:8161/admin/"
+      - "{{BaseURL}}:8161/admin/browse.jsp?JMSDestination=event"
+      - "{{BaseURL}}:8161/admin/index.jsp?printable=true"
+      - "{{BaseURL}}:8161/admin/test/systemProperties.jsp"
+      - "{{BaseURL}}:8161/api/jolokia/list"
+      - "{{BaseURL}}:8161/api/jolokia/"
+    headers:
+      Authorization: Basic YWRtaW46YWRtaW4=
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "ActiveMQ"
+          - "Jolokia"
+          - "Apache ActiveMQ"
+          - "Message Broker"
+        part: body
+        condition: or
+        case-insensitive: true
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+
+  - method: GET
+    path:
+      - "{{BaseURL}}/admin/"
+      - "{{BaseURL}}/admin/browse.jsp?JMSDestination=event"
+      - "{{BaseURL}}/admin/index.jsp?printable=true"
+      - "{{BaseURL}}/admin/test/systemProperties.jsp"
+      - "{{BaseURL}}/api/jolokia/list"
+      - "{{BaseURL}}/api/jolokia/"
+      - "{{BaseURL}}:8161/admin/"
+      - "{{BaseURL}}:8161/admin/browse.jsp?JMSDestination=event"
+      - "{{BaseURL}}:8161/admin/index.jsp?printable=true"
+      - "{{BaseURL}}:8161/admin/test/systemProperties.jsp"
+      - "{{BaseURL}}:8161/api/jolokia/list"
+      - "{{BaseURL}}:8161/api/jolokia/"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "ActiveMQ"
+          - "Jolokia"
+          - "Apache ActiveMQ"
+          - "Message Broker"
+        part: body
+        condition: or
+        case-insensitive: true
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

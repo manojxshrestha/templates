@@ -1,0 +1,52 @@
+id: jira-misconfig
+info:
+  name: Jira Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Jira instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access or configuration exposure.
+  tags: jira, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/servicedesk/signup"
+      - "{{BaseURL}}/secure/admin/AddSmtpMailServer!default.jspa"
+      - "{{BaseURL}}/secure/admin/ViewApplicationProperties.jspa"
+      - "{{BaseURL}}/secure/ContactAdministrators!default.jspa"
+      - "{{BaseURL}}/secure/admin/MailQueueAdmin!default.jspa"
+      - "{{BaseURL}}/QueryComponentRendererValue!Default.jspa?assignee=user:admin"
+      - "{{BaseURL}}:8080/servicedesk/signup"
+      - "{{BaseURL}}:8080/secure/admin/AddSmtpMailServer!default.jspa"
+      - "{{BaseURL}}:8080/secure/admin/ViewApplicationProperties.jspa"
+      - "{{BaseURL}}:8080/secure/ContactAdministrators!default.jspa"
+      - "{{BaseURL}}:8080/secure/admin/MailQueueAdmin!default.jspa"
+      - "{{BaseURL}}:8080/QueryComponentRendererValue!Default.jspa?assignee=user:admin"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Jira"
+          - "Atlassian Jira"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Jira"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

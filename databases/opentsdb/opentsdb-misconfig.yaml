@@ -1,0 +1,42 @@
+id: opentsdb-misconfig
+info:
+  name: OpenTSDB Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed OpenTSDB instances with accessible sensitive endpoints, potentially vulnerable to unauthorized data access.
+  tags: opentsdb, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/api/suggest?type=metrics&q=&max=10"
+      - "{{BaseURL}}:4242/api/suggest?type=metrics&q=&max=10"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "OpenTSDB"
+          - "metrics"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "OpenTSDB"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

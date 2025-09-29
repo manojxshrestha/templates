@@ -1,0 +1,44 @@
+id: v2board-webmin-misconfig
+info:
+  name: V2board and Webmin Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed V2board or Webmin instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access.
+  tags: v2board, webmin, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/api/v1/user/info"
+      - "{{BaseURL}}/password_change.cgi"
+      - "{{BaseURL}}:10000/api/v1/user/info"
+      - "{{BaseURL}}:10000/password_change.cgi"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "V2board"
+          - "Webmin"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Webmin"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

@@ -1,0 +1,41 @@
+id: docker-misconfig
+info:
+  name: Docker Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Docker instances with accessible registry endpoints or configuration files, potentially vulnerable to unauthorized access.
+  tags: docker, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/v2/_catalog"
+      - "{{BaseURL}}/docker-compose.yml"
+      - "{{BaseURL}}:2375/v2/_catalog"
+      - "{{BaseURL}}:2375/docker-compose.yml"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "repositories"
+          - "version: '"
+          - "services:"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Docker"
+        part: header
+        condition: or
+        case-insensitive: true
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

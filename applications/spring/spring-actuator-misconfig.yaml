@@ -1,0 +1,88 @@
+id: spring-actuator-misconfig
+info:
+  name: Spring Boot Actuator and Spring Cloud Gateway Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Spring Boot Actuator or Spring Cloud Gateway instances with accessible sensitive endpoints, potentially vulnerable to information disclosure or RCE.
+  tags: spring, actuator, misconfiguration, rce
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/%0aactuator"
+      - "{{BaseURL}}/%0dactuator"
+      - "{{BaseURL}}/actuator/auditevents"
+      - "{{BaseURL}}/actuator/beans"
+      - "{{BaseURL}}/actuator/caches"
+      - "{{BaseURL}}/actuator/conditions"
+      - "{{BaseURL}}/actuator/configprops"
+      - "{{BaseURL}}/actuator/env"
+      - "{{BaseURL}}/actuator/flyway"
+      - "{{BaseURL}}/actuator/health"
+      - "{{BaseURL}}/actuator/heapdump"
+      - "{{BaseURL}}/actuator/httptrace"
+      - "{{BaseURL}}/actuator/info"
+      - "{{BaseURL}}/actuator/integrationgraph"
+      - "{{BaseURL}}/actuator/liquibase"
+      - "{{BaseURL}}/actuator/logfile"
+      - "{{BaseURL}}/actuator/mappings"
+      - "{{BaseURL}}/actuator/metrics"
+      - "{{BaseURL}}/actuator/prometheus"
+      - "{{BaseURL}}/actuator/scheduledtasks"
+      - "{{BaseURL}}/actuator/sessions"
+      - "{{BaseURL}}/actuator/shutdown"
+      - "{{BaseURL}}/actuator/gateway/routes"
+      - "{{BaseURL}}/actuator/gateway/refresh"
+      - "{{BaseURL}}:8080/%0aactuator"
+      - "{{BaseURL}}:8080/%0dactuator"
+      - "{{BaseURL}}:8080/actuator/auditevents"
+      - "{{BaseURL}}:8080/actuator/beans"
+      - "{{BaseURL}}:8080/actuator/caches"
+      - "{{BaseURL}}:8080/actuator/conditions"
+      - "{{BaseURL}}:8080/actuator/configprops"
+      - "{{BaseURL}}:8080/actuator/env"
+      - "{{BaseURL}}:8080/actuator/flyway"
+      - "{{BaseURL}}:8080/actuator/health"
+      - "{{BaseURL}}:8080/actuator/heapdump"
+      - "{{BaseURL}}:8080/actuator/httptrace"
+      - "{{BaseURL}}:8080/actuator/info"
+      - "{{BaseURL}}:8080/actuator/integrationgraph"
+      - "{{BaseURL}}:8080/actuator/liquibase"
+      - "{{BaseURL}}:8080/actuator/logfile"
+      - "{{BaseURL}}:8080/actuator/mappings"
+      - "{{BaseURL}}:8080/actuator/metrics"
+      - "{{BaseURL}}:8080/actuator/prometheus"
+      - "{{BaseURL}}:8080/actuator/scheduledtasks"
+      - "{{BaseURL}}:8080/actuator/sessions"
+      - "{{BaseURL}}:8080/actuator/shutdown"
+      - "{{BaseURL}}:8080/actuator/gateway/routes"
+      - "{{BaseURL}}:8080/actuator/gateway/refresh"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Spring"
+          - "Actuator"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Spring"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

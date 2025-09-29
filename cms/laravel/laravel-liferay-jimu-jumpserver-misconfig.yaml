@@ -1,0 +1,51 @@
+id: laravel-liferay-jimu-jumpserver-misconfig
+info:
+  name: Laravel, Liferay Portal, JimuReport, or Jumpserver Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Laravel, Liferay Portal, JimuReport, or Jumpserver instances with accessible sensitive endpoints, potentially vulnerable to RCE or unauthorized access.
+  tags: laravel, liferay, jimureport, jumpserver, misconfiguration, rce
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/_ignition/execute-solution"
+      - "{{BaseURL}}/api/jsonws/invoke"
+      - "{{BaseURL}}/jmreport/queryFieldBySql"
+      - "{{BaseURL}}/core/auth/password/forget/previewing/"
+      - "{{BaseURL}}:8080/_ignition/execute-solution"
+      - "{{BaseURL}}:8080/api/jsonws/invoke"
+      - "{{BaseURL}}:8080/jmreport/queryFieldBySql"
+      - "{{BaseURL}}:8080/core/auth/password/forget/previewing/"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Laravel"
+          - "Liferay"
+          - "JimuReport"
+          - "Jumpserver"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Laravel"
+          - "Liferay"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

@@ -1,0 +1,65 @@
+id: coldfusion-misconfig
+info:
+  name: Adobe ColdFusion Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Adobe ColdFusion instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access or exploitation (e.g., CVE-2018-15961, CVE-2023-29300).
+  tags: coldfusion, misconfiguration, cve, rce
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/CFIDE/install.cfm"
+      - "{{BaseURL}}/CFIDE/administrator/enter.cfm"
+      - "{{BaseURL}}/CFIDE/administrator/archives/index.cfm"
+      - "{{BaseURL}}/CFIDE/administrator/entman/index.cfm"
+      - "{{BaseURL}}/CFIDE/wizards/common/_logintowizard.cfm"
+      - "{{BaseURL}}/CFIDE/administrator"
+      - "{{BaseURL}}/flex2gateway/amf"
+      - "{{BaseURL}}/cf_scripts/scripts/ajax/ckeditor/plugins/filemanager/iedit.cfc"
+      - "{{BaseURL}}/CFIDE/adminapi/accessmanager.cfc"
+      - "{{BaseURL}}/CFIDE/debug/cf_debugFr.cfm"
+      - "{{BaseURL}}/CFIDE/wizards/common/utils.cfc"
+      - "{{BaseURL}}:8500/CFIDE/install.cfm"
+      - "{{BaseURL}}:8500/CFIDE/administrator/enter.cfm"
+      - "{{BaseURL}}:8500/CFIDE/administrator/archives/index.cfm"
+      - "{{BaseURL}}:8500/CFIDE/administrator/entman/index.cfm"
+      - "{{BaseURL}}:8500/CFIDE/wizards/common/_logintowizard.cfm"
+      - "{{BaseURL}}:8500/CFIDE/administrator"
+      - "{{BaseURL}}:8500/flex2gateway/amf"
+      - "{{BaseURL}}:8500/cf_scripts/scripts/ajax/ckeditor/plugins/filemanager/iedit.cfc"
+      - "{{BaseURL}}:8500/CFIDE/adminapi/accessmanager.cfc"
+      - "{{BaseURL}}:8500/CFIDE/debug/cf_debugFr.cfm"
+      - "{{BaseURL}}:8500/CFIDE/wizards/common/utils.cfc"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "ColdFusion"
+          - "Adobe ColdFusion"
+          - "CFIDE"
+          - "ColdFusion Administrator"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "ColdFusion"
+          - "CFIDE"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

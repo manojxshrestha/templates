@@ -1,0 +1,87 @@
+id: app-misconfig
+info:
+  name: Application Misconfiguration Detection (AJ-Report, Druid, API Six, October CMS, etc.)
+  author: pwn
+  severity: high
+  description: Detects exposed endpoints in applications like AJ-Report, Apache Druid, Apache APISIX, October CMS, and others that may indicate misconfigurations or vulnerabilities.
+  tags: misconfiguration, aj-report, druid, apisix, october-cms, jeecg-boot, cve
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/dataSetParam/verification;swagger-ui"
+      - "{{BaseURL}}/druid/indexer/v1/sampler"
+      - "{{BaseURL}}/cas/login"
+      - "{{BaseURL}}/apisix/admin/routes"
+      - "{{BaseURL}}/apisix/admin/migrate/export"
+      - "{{BaseURL}}/apisix/admin/migrate/import"
+      - "{{BaseURL}}/Jsonrpc"
+      - "{{BaseURL}}/Remote_agent.php"
+      - "{{BaseURL}}/Install.php"
+      - "{{BaseURL}}/admin/moduleinterface.php"
+      - "{{BaseURL}}/backend/backend/auth/signin"
+      - "{{BaseURL}}/Backend"
+      - "{{BaseURL}}/jeecg-boot/jmreport/list"
+      - "{{BaseURL}}:8080/dataSetParam/verification;swagger-ui"
+      - "{{BaseURL}}:8080/druid/indexer/v1/sampler"
+      - "{{BaseURL}}:8080/cas/login"
+      - "{{BaseURL}}:8080/apisix/admin/routes"
+      - "{{BaseURL}}:8080/apisix/admin/migrate/export"
+      - "{{BaseURL}}:8080/apisix/admin/migrate/import"
+      - "{{BaseURL}}:8080/Jsonrpc"
+      - "{{BaseURL}}:8080/Remote_agent.php"
+      - "{{BaseURL}}:8080/Install.php"
+      - "{{BaseURL}}:8080/admin/moduleinterface.php"
+      - "{{BaseURL}}:8080/backend/backend/auth/signin"
+      - "{{BaseURL}}:8080/Backend"
+      - "{{BaseURL}}:8080/jeecg-boot/jmreport/list"
+      - "{{BaseURL}}:9180/apisix/admin/routes"
+      - "{{BaseURL}}:9180/apisix/admin/migrate/export"
+      - "{{BaseURL}}:9180/apisix/admin/migrate/import"
+      - "{{BaseURL}}:8081/druid/indexer/v1/sampler"
+      - "{{BaseURL}}:8082/cas/login"
+      - "{{BaseURL}}:8083/jeecg-boot/jmreport/list"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "AJ-Report"
+          - "Apache Druid"
+          - "Druid"
+          - "APISIX"
+          - "Apache APISIX"
+          - "CAS"
+          - "Central Authentication Service"
+          - "October CMS"
+          - "Jeecg-Boot"
+          - "JMReport"
+          - "swagger-ui"
+          - "JsonRpc"
+          - "moduleinterface"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: regex
+        name: php-indicators
+        regex:
+          - "(?i)Remote_agent\\.php"
+          - "(?i)Install\\.php"
+        part: request
+        condition: or
+      - type: regex
+        name: backend-signin
+        regex:
+          - "(?i)backend/backend/auth/signin"
+          - "(?i)Backend"
+        part: request
+        condition: or
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

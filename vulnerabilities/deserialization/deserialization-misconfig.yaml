@@ -1,0 +1,87 @@
+id: deserialization-misconfig
+info:
+  name: Deserialization Vulnerability Detection
+  author: pwn
+  severity: critical
+  description: Detects potential deserialization vulnerabilities in Express Node.js, Java ViewState, and JSON.Net applications by identifying specific headers, body content, or cookies.
+  tags: deserialization, express, nodejs, java, viewstate, json.net, rce, cve
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/"
+      - "{{BaseURL}}/login"
+      - "{{BaseURL}}/admin"
+      - "{{BaseURL}}/api"
+      - "{{BaseURL}}:8080/"
+      - "{{BaseURL}}:8080/login"
+      - "{{BaseURL}}:8080/admin"
+      - "{{BaseURL}}:8080/api"
+    matchers-condition: or
+    matchers:
+      - type: word
+        words:
+          - "X-Powered-By: Express"
+        part: header
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "<pre>Cannot GET /</pre>"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "javax.faces.ViewState"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: regex
+        regex:
+          - "(rO0AB|H4sIAA)"
+        part: body
+        condition: or
+      - type: regex
+        regex:
+          - "Set-Cookie:.*=eyJ"
+        part: header
+        condition: or
+      - type: word
+        words:
+          - "deserialize"
+          - "Json.Net"
+        part: body
+        condition: and
+        case-insensitive: true
+      - type: word
+        words:
+          - "Express"
+          - "ViewState"
+          - "Json.Net"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+      - type: regex
+        name: viewstate_value
+        part: body
+        regex:
+          - "javax\\.faces\\.ViewState\" value=\"([^\"]+)\""
+        group: 1
+      - type: regex
+        name: cookie_value
+        part: header
+        regex:
+          - "Set-Cookie:.*=eyJ([^;]+)"
+        group: 1

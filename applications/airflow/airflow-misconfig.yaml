@@ -1,0 +1,70 @@
+id: airflow-misconfig
+info:
+  name: Apache Airflow Misconfiguration Detection
+  author: pwn
+  severity: medium
+  description: Detects exposed Apache Airflow instances with accessible sensitive endpoints or default configurations, potentially vulnerable to unauthorized access (e.g., CVE-2020-17526).
+  tags: airflow, misconfiguration, cve
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/api/v1/version"
+      - "{{BaseURL}}/rest_api/api?api=version"
+      - "{{BaseURL}}/rest_api/api/v1.0/version"
+      - "{{BaseURL}}/admin/rest_api/api?api=version"
+      - "{{BaseURL}}/admin/rest_api/api/v1.0/version"
+      - "{{BaseURL}}/login"
+      - "{{BaseURL}}/airflow/login"
+      - "{{BaseURL}}/admin/airflow/login"
+      - "{{BaseURL}}:8080/api/v1/version"
+      - "{{BaseURL}}:8080/rest_api/api?api=version"
+      - "{{BaseURL}}:8080/rest_api/api/v1.0/version"
+      - "{{BaseURL}}:8080/admin/rest_api/api?api=version"
+      - "{{BaseURL}}:8080/admin/rest_api/api/v1.0/version"
+      - "{{BaseURL}}:8080/login"
+      - "{{BaseURL}}:8080/airflow/login"
+      - "{{BaseURL}}:8080/admin/airflow/login"
+      - "{{BaseURL}}:8161/api/v1/version"
+      - "{{BaseURL}}:8161/rest_api/api?api=version"
+      - "{{BaseURL}}:8161/rest_api/api/v1.0/version"
+      - "{{BaseURL}}:8161/admin/rest_api/api?api=version"
+      - "{{BaseURL}}:8161/admin/rest_api/api/v1.0/version"
+      - "{{BaseURL}}:8161/login"
+      - "{{BaseURL}}:8161/airflow/login"
+      - "{{BaseURL}}:8161/admin/airflow/login"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Apache Airflow"
+          - "Airflow"
+          - "airflow"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "circles"
+          - "airflow-404"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 404
+      - type: regex
+        name: set-cookie-jwt
+        regex:
+          - "Set-Cookie:.*=eyJ"
+        part: header
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

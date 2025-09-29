@@ -1,0 +1,41 @@
+id: minio-misconfig
+info:
+  name: MinIO Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed MinIO instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access.
+  tags: minio, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/minio/bootstrap/v1/verify"
+      - "{{BaseURL}}:9000/minio/bootstrap/v1/verify"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "MinIO"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "MinIO"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

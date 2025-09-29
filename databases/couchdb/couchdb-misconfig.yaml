@@ -1,0 +1,58 @@
+id: couchdb-misconfig
+info:
+  name: Apache CouchDB Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Apache CouchDB instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access or exploitation (e.g., CVE-2017-12635).
+  tags: couchdb, misconfiguration, cve
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/_utils/"
+      - "{{BaseURL}}/_users/org.couchdb.user:{{username}}"
+      - "{{BaseURL}}/_config/query_servers/cmd"
+      - "{{BaseURL}}/_membership"
+      - "{{BaseURL}}:5984/_utils/"
+      - "{{BaseURL}}:5984/_users/org.couchdb.user:{{username}}"
+      - "{{BaseURL}}:5984/_config/query_servers/cmd"
+      - "{{BaseURL}}:5984/_membership"
+    payloads:
+      username:
+        - "admin"
+        - "user"
+        - "test"
+        - "couchdb"
+    attack: batteringram
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "couchdb"
+          - "Welcome"
+          - "Apache CouchDB"
+          - "Fauxton"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "couchdb"
+          - "CouchDB"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

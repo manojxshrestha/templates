@@ -1,0 +1,48 @@
+id: goahead-misconfig
+info:
+  name: GoAhead Web Server Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed GoAhead Web Server instances with accessible CGI endpoints, potentially vulnerable to unauthorized access.
+  tags: goahead, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/cgi-bin/index"
+      - "{{BaseURL}}:8080/cgi-bin/index"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "GoAhead"
+          - "GoAhead-Webs"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Server: GoAhead"
+        part: header
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "GoAhead"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

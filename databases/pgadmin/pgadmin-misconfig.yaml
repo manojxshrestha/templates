@@ -1,0 +1,41 @@
+id: pgadmin-misconfig
+info:
+  name: pgAdmin Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed pgAdmin instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access.
+  tags: pgadmin, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/misc/validate_binary_path"
+      - "{{BaseURL}}:8080/misc/validate_binary_path"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "pgAdmin"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "pgAdmin"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

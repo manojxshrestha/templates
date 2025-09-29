@@ -1,0 +1,78 @@
+id: drupal-werkzeug-misconfig
+info:
+  name: Drupal and Werkzeug Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Drupal instances and Werkzeug debug consoles, potentially vulnerable to unauthorized access or remote code execution (e.g., CVE-2018-7600 for Drupal, Werkzeug console RCE).
+  tags: drupal, werkzeug, misconfiguration, cve, rce
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/CHANGELOG.txt"
+      - "{{BaseURL}}/rest"
+      - "{{BaseURL}}/admin/config/development/configuration/single/import"
+      - "{{BaseURL}}/user/register"
+      - "{{BaseURL}}/node/{{num}}"
+      - "{{BaseURL}}:8080/CHANGELOG.txt"
+      - "{{BaseURL}}:8080/rest"
+      - "{{BaseURL}}:8080/admin/config/development/configuration/single/import"
+      - "{{BaseURL}}:8080/user/register"
+      - "{{BaseURL}}:8080/node/{{num}}"
+      - "{{BaseURL}}/console"
+      - "{{BaseURL}}/console;"
+      - "{{BaseURL}}/console%A0"
+      - "{{BaseURL}}/x/..;/console"
+      - "{{BaseURL}}:8080/console"
+      - "{{BaseURL}}:8080/console;"
+      - "{{BaseURL}}:8080/console%A0"
+      - "{{BaseURL}}:8080/x/..;/console"
+    payloads:
+      num:
+        - "1"
+        - "10"
+        - "100"
+        - "1000"
+    attack: batteringram
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Drupal"
+          - "<meta name=\"Generator\" content=\"Drupal"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Interactive console"
+          - "Werkzeug"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: regex
+        name: server-werkzeug
+        regex:
+          - "Server:.*Werkzeug"
+        part: header
+      - type: word
+        words:
+          - "Drupal"
+          - "Node"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

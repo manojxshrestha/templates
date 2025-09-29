@@ -1,0 +1,44 @@
+id: ofbiz-misconfig
+info:
+  name: Apache OFBiz Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Apache OFBiz instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access or RCE.
+  tags: ofbiz, misconfiguration, rce
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/webtools/control/xmlrpc"
+      - "{{BaseURL}}/webtools/control/ProgramExport/"
+      - "{{BaseURL}}:8080/webtools/control/xmlrpc"
+      - "{{BaseURL}}:8080/webtools/control/ProgramExport/"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "OFBiz"
+          - "Apache OFBiz"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "OFBiz"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

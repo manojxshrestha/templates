@@ -1,0 +1,118 @@
+id: web-cache-deception
+info:
+  name: Web Cache Deception Detection
+  author: pwn
+  severity: high
+  description: Detects Web Cache Deception vulnerabilities by testing URL patterns and special characters that may trick caching layers into storing dynamic content as static resources, potentially exposing sensitive data or enabling Self-XSS.
+  tags: cache-deception, path-traversal, self-xss, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/user-Info"
+      - "{{BaseURL}}/user-Info{{pattern}}"
+      - "{{BaseURL}}:8080/user-Info"
+      - "{{BaseURL}}:8080/user-Info{{pattern}}"
+    payloads:
+      pattern:
+        - ".css"
+        - "/.css"
+        - "/;.css"
+        - "/file.css"
+        - "%2Ffile.css"
+        - "%25%32%46file.css"
+        - "%3Ffile.css"
+        - "%25%33%46file.css"
+        - "%0Afile.css"
+        - "%0Dfile.css"
+        - "%0A%0Dfile.css"
+        - "%09%0A%0Dfile.css"
+        - "%25%30%41file.css"
+        - "%25%30%30file.css"
+        - "%3Bfile.css"
+        - "%25%33%42file.css"
+        - "%23file.css"
+        - "%25%32%33file.css"
+        - "/"
+        - "."
+        - "?"
+        - ":"
+        - "#"
+        - "["
+        - "]"
+        - "@"
+        - "!"
+        - "$"
+        - "&"
+        - "\""
+        - "("
+        - ")"
+        - "*"
+        - "+"
+        - ","
+        - ";"
+        - "="
+        - "/../user-Info"
+        - "/../../user-Info"
+        - "%2E%2E%2Fuser-Info"
+        - "%2E%2E%5Cuser-Info"
+        - "%252E%252E%252Fuser-Info"
+        - "%252E%252E%255Cuser-Info"
+    attack: batteringram
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "user"
+          - "email"
+          - "password"
+          - "token"
+          - "profile"
+          - "<script>"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Cache-Control: public"
+          - "X-Cache: Hit"
+          - "X-Cache: Miss"
+          - "Via:.*cache"
+          - "Age:"
+        part: header
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "user"
+          - "admin"
+          - "login"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+      - type: regex
+        name: sensitive_data
+        part: body
+        regex:
+          - "(user|email|password|token)=[^&\\s\"']+"
+        group: 1
+      - type: regex
+        name: cache_headers
+        part: header
+        regex:
+          - "(Cache-Control|X-Cache|Via|Age):.*"
+        group: 1

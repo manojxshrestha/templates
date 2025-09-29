@@ -1,0 +1,90 @@
+id: confluence-misconfig
+info:
+  name: Atlassian Confluence Misconfiguration and SSTI Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Atlassian Confluence instances with accessible sensitive endpoints or vulnerable to Server-Side Template Injection (SSTI), potentially leading to remote code execution (e.g., CVE-2019-3396).
+  tags: confluence, ssti, misconfiguration, cve, rce
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/rest/tinymce/1/macro/preview"
+      - "{{BaseURL}}/pages/doenterpagevariables.action"
+      - "{{BaseURL}}/pages/createpage-entervariables.action"
+      - "{{BaseURL}}/pages/createpage.action"
+      - "{{BaseURL}}/template/aui/text-inline.vm"
+      - "{{BaseURL}}/server-info.action?bootstrapStatusProvider.applicationConfig.setupComplete=false"
+      - "{{BaseURL}}/setup/setupadministrator.action"
+      - "{{BaseURL}}/setup/finishsetup.action"
+      - "{{BaseURL}}:8090/rest/tinymce/1/macro/preview"
+      - "{{BaseURL}}:8090/pages/doenterpagevariables.action"
+      - "{{BaseURL}}:8090/pages/createpage-entervariables.action"
+      - "{{BaseURL}}:8090/pages/createpage.action"
+      - "{{BaseURL}}:8090/template/aui/text-inline.vm"
+      - "{{BaseURL}}:8090/server-info.action?bootstrapStatusProvider.applicationConfig.setupComplete=false"
+      - "{{BaseURL}}:8090/setup/setupadministrator.action"
+      - "{{BaseURL}}:8090/setup/finishsetup.action"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Confluence"
+          - "Atlassian Confluence"
+          - "confluence"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: regex
+        name: atlassian-token
+        regex:
+          - "X-Atlassian-Token:.*no-check"
+        part: header
+      - type: word
+        words:
+          - "Confluence"
+          - "Atlassian"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+
+  - method: GET
+    path:
+      - "{{BaseURL}}/rest/tinymce/1/macro/preview?macroName=test&${7*7}"
+      - "{{BaseURL}}:8090/rest/tinymce/1/macro/preview?macroName=test&${7*7}"
+    matchers-condition: or
+    matchers:
+      - type: word
+        words:
+          - "49"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Confluence"
+          - "Atlassian Confluence"
+        part: body
+        condition: or
+        case-insensitive: true
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/[^?]+)"
+        group: 1

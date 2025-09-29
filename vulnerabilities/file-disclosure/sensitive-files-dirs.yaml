@@ -1,0 +1,221 @@
+id: sensitive-files-dirs
+info:
+  name: Sensitive Directories and Files Detection
+  author: pwn
+  severity: high
+  description: Detects exposed sensitive directories and files that may indicate misconfigurations or vulnerabilities, potentially leading to information disclosure or unauthorized access.
+  tags: misconfiguration, sensitive, file-exposure, path-traversal
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/groovyconsole"
+      - "{{BaseURL}}/server-info"
+      - "{{BaseURL}}/.aws/config"
+      - "{{BaseURL}}/.aws/credentials"
+      - "{{BaseURL}}/app.config"
+      - "{{BaseURL}}/web.config"
+      - "{{BaseURL}}/local.settings.json"
+      - "{{BaseURL}}/hsqldb"
+      - "{{BaseURL}}/dashboard"
+      - "{{BaseURL}}/admin"
+      - "{{BaseURL}}/settings.py"
+      - "{{BaseURL}}/.DS_Store"
+      - "{{BaseURL}}/elmah.axd"
+      - "{{BaseURL}}/console"
+      - "{{BaseURL}}/.config/.boto"
+      - "{{BaseURL}}/.git"
+      - "{{BaseURL}}/.git/config"
+      - "{{BaseURL}}/conf"
+      - "{{BaseURL}}/login"
+      - "{{BaseURL}}/jkstatus"
+      - "{{BaseURL}}/.env"
+      - "{{BaseURL}}/status"
+      - "{{BaseURL}}/server-status"
+      - "{{BaseURL}}/servicedesk"
+      - "{{BaseURL}}/actuator/env"
+      - "{{BaseURL}}/_fragment"
+      - "{{BaseURL}}/manager"
+      - "{{BaseURL}}/Trace.axd"
+      - "{{BaseURL}}/home"
+      - "{{BaseURL}}/virtualjdbc"
+      - "{{BaseURL}}/actuator/heapdump"
+      - "{{BaseURL}}////../../../../etc/passwd"
+      - "{{BaseURL}}////////../../../../etc/passwd"
+      - "{{BaseURL}}/wp-admin/install.php"
+      - "{{BaseURL}}/Wp-config.php~"
+      - "{{BaseURL}}/phppgadmin"
+      - "{{BaseURL}}/cgi-bin"
+      - "{{BaseURL}}/phpmyadmin"
+      - "{{BaseURL}}/phpinfo.php"
+      - "{{BaseURL}}/adminer.php"
+      - "{{BaseURL}}/db.xml"
+      - "{{BaseURL}}/kibana"
+      - "{{BaseURL}}/sqlite"
+      - "{{BaseURL}}/Appsettings.json"
+      - "{{BaseURL}}/.svn::$INDEX_ALLOCATION/entries"
+      - "{{BaseURL}}/jkstatus;"
+      - "{{BaseURL}}/install.php"
+      - "{{BaseURL}}/login.jsp"
+      - "{{BaseURL}}/.htaccess"
+      - "{{BaseURL}}/portal"
+      - "{{BaseURL}}/env.js"
+      - "{{BaseURL}}/.svn/entries"
+      - "{{BaseURL}}/config.js"
+      - "{{BaseURL}}/credentials.db"
+      - "{{BaseURL}}/actuator/gateway/routes"
+      - "{{BaseURL}}/dbconsole"
+      - "{{BaseURL}}/gateway/routes"
+      - "{{BaseURL}}/.ssh"
+      - "{{BaseURL}}/.aws/x/..;/config"
+      - "{{BaseURL}}/asynchPeople"
+      - "{{BaseURL}}/whoAmI"
+      - "{{BaseURL}}/jmx-console"
+      - "{{BaseURL}}/salesforce.js"
+      - "{{BaseURL}}/90-local.conf"
+      - "{{BaseURL}}/tmui/login.jsp"
+      - "{{BaseURL}}/mifs"
+      - "{{BaseURL}}/solr"
+      - "{{BaseURL}}/.aws/x/../config"
+      - "{{BaseURL}}/script"
+      - "{{BaseURL}}/signup"
+      - "{{BaseURL}}/dev"
+      - "{{BaseURL}}/user.txt"
+      - "{{BaseURL}}/users.txt"
+      - "{{BaseURL}}/uploads"
+      - "{{BaseURL}}/login.php"
+      - "{{BaseURL}}:8080/groovyconsole"
+      - "{{BaseURL}}:8080/server-info"
+      - "{{BaseURL}}:8080/.aws/config"
+      - "{{BaseURL}}:8080/.aws/credentials"
+      - "{{BaseURL}}:8080/app.config"
+      - "{{BaseURL}}:8080/web.config"
+      - "{{BaseURL}}:8080/local.settings.json"
+      - "{{BaseURL}}:8080/hsqldb"
+      - "{{BaseURL}}:8080/dashboard"
+      - "{{BaseURL}}:8080/admin"
+      - "{{BaseURL}}:8080/settings.py"
+      - "{{BaseURL}}:8080/.DS_Store"
+      - "{{BaseURL}}:8080/elmah.axd"
+      - "{{BaseURL}}:8080/console"
+      - "{{BaseURL}}:8080/.config/.boto"
+      - "{{BaseURL}}:8080/.git"
+      - "{{BaseURL}}:8080/.git/config"
+      - "{{BaseURL}}:8080/conf"
+      - "{{BaseURL}}:8080/login"
+      - "{{BaseURL}}:8080/jkstatus"
+      - "{{BaseURL}}:8080/.env"
+      - "{{BaseURL}}:8080/status"
+      - "{{BaseURL}}:8080/server-status"
+      - "{{BaseURL}}:8080/servicedesk"
+      - "{{BaseURL}}:8080/actuator/env"
+      - "{{BaseURL}}:8080/_fragment"
+      - "{{BaseURL}}:8080/manager"
+      - "{{BaseURL}}:8080/Trace.axd"
+      - "{{BaseURL}}:8080/home"
+      - "{{BaseURL}}:8080/virtualjdbc"
+      - "{{BaseURL}}:8080/actuator/heapdump"
+      - "{{BaseURL}}:8080////../../../../etc/passwd"
+      - "{{BaseURL}}:8080////////../../../../etc/passwd"
+      - "{{BaseURL}}:8080/wp-admin/install.php"
+      - "{{BaseURL}}:8080/Wp-config.php~"
+      - "{{BaseURL}}:8080/phppgadmin"
+      - "{{BaseURL}}:8080/cgi-bin"
+      - "{{BaseURL}}:8080/phpmyadmin"
+      - "{{BaseURL}}:8080/phpinfo.php"
+      - "{{BaseURL}}:8080/adminer.php"
+      - "{{BaseURL}}:8080/db.xml"
+      - "{{BaseURL}}:8080/kibana"
+      - "{{BaseURL}}:8080/sqlite"
+      - "{{BaseURL}}:8080/Appsettings.json"
+      - "{{BaseURL}}:8080/.svn::$INDEX_ALLOCATION/entries"
+      - "{{BaseURL}}:8080/jkstatus;"
+      - "{{BaseURL}}:8080/install.php"
+      - "{{BaseURL}}:8080/login.jsp"
+      - "{{BaseURL}}:8080/.htaccess"
+      - "{{BaseURL}}:8080/portal"
+      - "{{BaseURL}}:8080/env.js"
+      - "{{BaseURL}}:8080/.svn/entries"
+      - "{{BaseURL}}:8080/config.js"
+      - "{{BaseURL}}:8080/credentials.db"
+      - "{{BaseURL}}:8080/actuator/gateway/routes"
+      - "{{BaseURL}}:8080/dbconsole"
+      - "{{BaseURL}}:8080/gateway/routes"
+      - "{{BaseURL}}:8080/.ssh"
+      - "{{BaseURL}}:8080/.aws/x/..;/config"
+      - "{{BaseURL}}:8080/asynchPeople"
+      - "{{BaseURL}}:8080/whoAmI"
+      - "{{BaseURL}}:8080/jmx-console"
+      - "{{BaseURL}}:8080/salesforce.js"
+      - "{{BaseURL}}:8080/90-local.conf"
+      - "{{BaseURL}}:8080/tmui/login.jsp"
+      - "{{BaseURL}}:8080/mifs"
+      - "{{BaseURL}}:8080/solr"
+      - "{{BaseURL}}:8080/.aws/x/../config"
+      - "{{BaseURL}}:8080/script"
+      - "{{BaseURL}}:8080/signup"
+      - "{{BaseURL}}:8080/dev"
+      - "{{BaseURL}}:8080/user.txt"
+      - "{{BaseURL}}:8080/users.txt"
+      - "{{BaseURL}}:8080/uploads"
+      - "{{BaseURL}}:8080/login.php"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "AWS_ACCESS_KEY_ID"
+          - "AWS_SECRET_ACCESS_KEY"
+          - "password"
+          - "secret"
+          - "DB_PASSWORD"
+          - "wp-config"
+          - "phpMyAdmin"
+          - "phpinfo"
+          - "adminer"
+          - "kibana"
+          - "solr"
+          - "actuator"
+          - "git-config"
+          - "svn"
+          - "htaccess"
+          - "credentials"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Server: Apache"
+          - "Server: nginx"
+          - "X-Powered-By: PHP"
+        part: header
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "admin"
+          - "console"
+          - "dashboard"
+          - "login"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+      - type: regex
+        name: sensitive_data
+        part: body
+        regex:
+          - "(AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|DB_PASSWORD|password|secret)=[^&\\s\"']+"
+        group: 1

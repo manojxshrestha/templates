@@ -1,0 +1,64 @@
+id: nuxeo-misconfig
+info:
+  name: Nuxeo Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Nuxeo instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access or path traversal.
+  tags: nuxeo, misconfiguration, path-traversal
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/login.jsp"
+      - "{{BaseURL}}/xx/..;/login.jsp"
+      - "{{BaseURL}}/maintenance/..;/login.jsp"
+      - "{{BaseURL}}/nuxeo/login.jsp"
+      - "{{BaseURL}}/xx/..;/nuxeo/login.jsp"
+      - "{{BaseURL}}/maintenance/..;/nuxeo/login.jsp"
+      - "{{BaseURL}}/login.jsp/pwn${7+7}.xhtml"
+      - "{{BaseURL}}/xx/..;/login.jsp/pwn${7+7}.xhtml"
+      - "{{BaseURL}}/maintenance/..;/login.jsp/pwn${7+7}.xhtml"
+      - "{{BaseURL}}/nuxeo/login.jsp/pwn${7+7}.xhtml"
+      - "{{BaseURL}}/xx/..;/nuxeo/login.jsp/pwn${7+7}.xhtml"
+      - "{{BaseURL}}/maintenance/..;/nuxeo/login.jsp/pwn${7+7}.xhtml"
+      - "{{BaseURL}}:8080/login.jsp"
+      - "{{BaseURL}}:8080/xx/..;/login.jsp"
+      - "{{BaseURL}}:8080/maintenance/..;/login.jsp"
+      - "{{BaseURL}}:8080/nuxeo/login.jsp"
+      - "{{BaseURL}}:8080/xx/..;/nuxeo/login.jsp"
+      - "{{BaseURL}}:8080/maintenance/..;/nuxeo/login.jsp"
+      - "{{BaseURL}}:8080/login.jsp/pwn${7+7}.xhtml"
+      - "{{BaseURL}}:8080/xx/..;/login.jsp/pwn${7+7}.xhtml"
+      - "{{BaseURL}}:8080/maintenance/..;/login.jsp/pwn${7+7}.xhtml"
+      - "{{BaseURL}}:8080/nuxeo/login.jsp/pwn${7+7}.xhtml"
+      - "{{BaseURL}}:8080/xx/..;/nuxeo/login.jsp/pwn${7+7}.xhtml"
+      - "{{BaseURL}}:8080/maintenance/..;/nuxeo/login.jsp/pwn${7+7}.xhtml"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Nuxeo"
+          - "login.jsp"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Nuxeo"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

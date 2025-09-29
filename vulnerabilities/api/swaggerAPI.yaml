@@ -1,0 +1,131 @@
+id: swagger-exposure
+info:
+  name: Exposed Swagger API Documentation
+  author: pwn
+  severity: info
+  description: Detects exposed Swagger/OpenAPI documentation endpoints that may reveal sensitive API structures or configurations.
+  tags: exposure, swagger, openapi, api
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/api/v2/index.html"
+      - "{{BaseURL}}/api/swagger"
+      - "{{BaseURL}}/api/apidocs/swagger.json"
+      - "{{BaseURL}}/api-docs/swagger.yaml"
+      - "{{BaseURL}}/spec/index.html"
+      - "{{BaseURL}}/api-docs/swagger.json"
+      - "{{BaseURL}}/_swagger_/"
+      - "{{BaseURL}}/api/api-docs"
+      - "{{BaseURL}}/docs/index.html"
+      - "{{BaseURL}}/v1/api/swagger-ui.html"
+      - "{{BaseURL}}/apidocs/swagger-ui.html"
+      - "{{BaseURL}}/api/swagger-ui/swagger.yaml"
+      - "{{BaseURL}}/swagger-resources/restservices/v2/api-docs/swagger-ui.html"
+      - "{{BaseURL}}/swagger/v2/index.html"
+      - "{{BaseURL}}/api/swagger-resources"
+      - "{{BaseURL}}/api/v1/swagger-ui/swagger.json"
+      - "{{BaseURL}}/api/v2/swagger-ui.html"
+      - "{{BaseURL}}/swagger-ui/index.html"
+      - "{{BaseURL}}/api/v1/index.html"
+      - "{{BaseURL}}/swagger/swagger-ui.js"
+      - "{{BaseURL}}/api/swagger/index.html"
+      - "{{BaseURL}}/swagger/v1/swagger-ui.html"
+      - "{{BaseURL}}/swagger-resources/restservices/v2/api-docs"
+      - "{{BaseURL}}/swagger-ui.html"
+      - "{{BaseURL}}/api/swagger/swagger-ui.html"
+      - "{{BaseURL}}/v1/api/index.html"
+      - "{{BaseURL}}/api/docs/"
+      - "{{BaseURL}}/__swagger__/index.html"
+      - "{{BaseURL}}/swagger/v2/swagger-ui.html"
+      - "{{BaseURL}}/api/spec/swagger.json"
+      - "{{BaseURL}}/api/swagger_doc.json"
+      - "{{BaseURL}}/swagger/swagger-ui.html"
+      - "{{BaseURL}}/spec/swagger-ui.html"
+      - "{{BaseURL}}/swagger-ui/swagger-ui.js"
+      - "{{BaseURL}}/api/static/swagger-ui/swagger-ui.html"
+      - "{{BaseURL}}/docs"
+      - "{{BaseURL}}/api/swagger-ui.html"
+      - "{{BaseURL}}/api/swagger/ui/index"
+      - "{{BaseURL}}/swagger-resources/restservices/v2/api-docs/index.html"
+      - "{{BaseURL}}/api/v1/swagger-ui/swagger.yaml"
+      - "{{BaseURL}}/api/spec/swagger.yaml"
+      - "{{BaseURL}}/swagger.json"
+      - "{{BaseURL}}/api-doc"
+      - "{{BaseURL}}/api/swagger-resources/restservices/v2/api-docs"
+      - "{{BaseURL}}/api/apidocs"
+      - "{{BaseURL}}/api/_swagger_/"
+      - "{{BaseURL}}/swagger.yaml"
+      - "{{BaseURL}}/apidocs/index.html"
+      - "{{BaseURL}}/api/static/swagger-ui/index.html"
+      - "{{BaseURL}}/api/swagger-ui/swagger.json"
+      - "{{BaseURL}}/swagger/v1/swagger.json"
+      - "{{BaseURL}}/api/static/swagger-ui.html"
+      - "{{BaseURL}}/api/v1/swagger-ui.html"
+      - "{{BaseURL}}/swagger/v1/index.html"
+      - "{{BaseURL}}/api/api-docs/swagger.yaml"
+      - "{{BaseURL}}/docs/swagger-ui.html"
+      - "{{BaseURL}}/api/swagger/static/index.html"
+      - "{{BaseURL}}/api/doc.json"
+      - "{{BaseURL}}/api/doc"
+      - "{{BaseURL}}/api/swagger-ui/api-docs"
+      - "{{BaseURL}}/index.html"
+      - "{{BaseURL}}/api/swagger.yml"
+      - "{{BaseURL}}/swagger-ui.js"
+      - "{{BaseURL}}/swagger/v1/swagger.yaml"
+      - "{{BaseURL}}/__swagger__/swagger-ui.html"
+      - "{{BaseURL}}/swagger-ui/swagger-ui.html"
+      - "{{BaseURL}}/api/static/index.html"
+      - "{{BaseURL}}/api/__swagger__/"
+      - "{{BaseURL}}/api-docs/index.html"
+      - "{{BaseURL}}/swagger/index.html"
+      - "{{BaseURL}}/api/apidocs/swagger.yaml"
+      - "{{BaseURL}}/swagger"
+      - "{{BaseURL}}/api/swagger.yaml"
+      - "{{BaseURL}}/swagger/ui/swagger-ui.js"
+      - "{{BaseURL}}/api/swagger.json"
+      - "{{BaseURL}}/api-docs/swagger-ui.html"
+      - "{{BaseURL}}/__swagger__/"
+      - "{{BaseURL}}/api_docs"
+      - "{{BaseURL}}/api/index.html"
+      - "{{BaseURL}}/docu"
+      - "{{BaseURL}}/swagger/ui/index"
+      - "{{BaseURL}}/api/api-docs/swagger.json"
+      - "{{BaseURL}}/swagger/v2/swagger.json"
+      - "{{BaseURL}}/swagger/v2/swagger.yaml"
+      - "{{BaseURL}}/swagger/v1/api-docs"
+      - "{{BaseURL}}/swagger/v2/api-docs"
+      - "{{BaseURL}}/swagger/api-docs"
+      - "{{BaseURL}}/v2/api-docs"
+      - "{{BaseURL}}/v1/api-docs"
+      - "{{BaseURL}}/api-docs"
+      - "{{BaseURL}}/api/v1/swagger.json"
+      - "{{BaseURL}}/api/v1/swagger.yaml"
+      - "{{BaseURL}}/api/v2/swagger.json"
+      - "{{BaseURL}}/api/v2/swagger.yaml"
+      - "{{BaseURL}}/api/docs"
+      - "{{BaseURL}}/static/api/swagger.json"
+      - "{{BaseURL}}/static/api/swagger.yaml"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "swagger"
+          - "Swagger"
+          - "openapi"
+          - "OpenAPI"
+          - "swagger-ui"
+          - "api-docs"
+        part: body
+        condition: or
+        case-insensitive: true
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

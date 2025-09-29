@@ -1,0 +1,294 @@
+id: tomcat-misconfig
+info:
+  name: Apache Tomcat Misconfiguration and Default Credentials
+  author: pwn
+  severity: high
+  description: Detects exposed Apache Tomcat instances with default credentials (tomcat:tomcat, tomcat:s3cret) or accessible sensitive endpoints, potentially vulnerable to unauthorized access or exploitation (e.g., CVE-2017-12617).
+  tags: tomcat, misconfiguration, default-credentials, cve
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/manager/html"
+      - "{{BaseURL}}/..%3B/manager/html"
+      - "{{BaseURL}}/xx/..%3B/manager/html"
+      - "{{BaseURL}}/%3B/..%3B/manager/html"
+      - "{{BaseURL}}/manager/x/..;/html"
+      - "{{BaseURL}}/manager;X=Y/html"
+      - "{{BaseURL}}/host-manager/html"
+      - "{{BaseURL}}/..%3B/host-manager/html"
+      - "{{BaseURL}}/xx/..%3B/host-manager/html"
+      - "{{BaseURL}}/%3B/..%3B/host-manager/html"
+      - "{{BaseURL}}/host-manager/x/..%3B/html"
+      - "{{BaseURL}}/host-manager;X=Y/html"
+      - "{{BaseURL}}/manager/status"
+      - "{{BaseURL}}/..%3B/manager/status"
+      - "{{BaseURL}}/xx/..%3B/manager/status"
+      - "{{BaseURL}}/%3B/..%3B/manager/status"
+      - "{{BaseURL}}/manager/x/..;/status"
+      - "{{BaseURL}}/manager;X=Y/status"
+      - "{{BaseURL}}/manager/text"
+      - "{{BaseURL}}/..%3B/manager/text"
+      - "{{BaseURL}}/xx/..%3B/manager/text"
+      - "{{BaseURL}}/%3B/..%3B/manager/text"
+      - "{{BaseURL}}/manager/x/..;/text"
+      - "{{BaseURL}}/manager;X=Y/text"
+      - "{{BaseURL}}/WEB-INF/web.xml"
+      - "{{BaseURL}}/./WEB-INF/web.xml"
+      - "{{BaseURL}}/.//WEB-INF/web.xml"
+      - "{{BaseURL}}/docs/introduction.html"
+      - "{{BaseURL}}/examples/servlets"
+      - "{{BaseURL}}/test.jsp%01"
+      - "{{BaseURL}}:8080/manager/html"
+      - "{{BaseURL}}:8080/..%3B/manager/html"
+      - "{{BaseURL}}:8080/xx/..%3B/manager/html"
+      - "{{BaseURL}}:8080/%3B/..%3B/manager/html"
+      - "{{BaseURL}}:8080/manager/x/..;/html"
+      - "{{BaseURL}}:8080/manager;X=Y/html"
+      - "{{BaseURL}}:8080/host-manager/html"
+      - "{{BaseURL}}:8080/..%3B/host-manager/html"
+      - "{{BaseURL}}:8080/xx/..%3B/host-manager/html"
+      - "{{BaseURL}}:8080/%3B/..%3B/host-manager/html"
+      - "{{BaseURL}}:8080/host-manager/x/..%3B/html"
+      - "{{BaseURL}}:8080/host-manager;X=Y/html"
+      - "{{BaseURL}}:8080/manager/status"
+      - "{{BaseURL}}:8080/..%3B/manager/status"
+      - "{{BaseURL}}:8080/xx/..%3B/manager/status"
+      - "{{BaseURL}}:8080/%3B/..%3B/manager/status"
+      - "{{BaseURL}}:8080/manager/x/..;/status"
+      - "{{BaseURL}}:8080/manager;X=Y/status"
+      - "{{BaseURL}}:8080/manager/text"
+      - "{{BaseURL}}:8080/..%3B/manager/text"
+      - "{{BaseURL}}:8080/xx/..%3B/manager/text"
+      - "{{BaseURL}}:8080/%3B/..%3B/manager/text"
+      - "{{BaseURL}}:8080/manager/x/..;/text"
+      - "{{BaseURL}}:8080/manager;X=Y/text"
+      - "{{BaseURL}}:8080/WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/./WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/.//WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/docs/introduction.html"
+      - "{{BaseURL}}:8080/examples/servlets"
+      - "{{BaseURL}}:8080/test.jsp%01"
+    headers:
+      Authorization: Basic dG9tY2F0OnRvbWNhdA==
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Apache Tomcat"
+          - "Tomcat Manager Application"
+          - "Host Manager"
+          - "<web-app"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Apache Tomcat"
+          - "Tomcat"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+
+  - method: GET
+    path:
+      - "{{BaseURL}}/manager/html"
+      - "{{BaseURL}}/..%3B/manager/html"
+      - "{{BaseURL}}/xx/..%3B/manager/html"
+      - "{{BaseURL}}/%3B/..%3B/manager/html"
+      - "{{BaseURL}}/manager/x/..;/html"
+      - "{{BaseURL}}/manager;X=Y/html"
+      - "{{BaseURL}}/host-manager/html"
+      - "{{BaseURL}}/..%3B/host-manager/html"
+      - "{{BaseURL}}/xx/..%3B/host-manager/html"
+      - "{{BaseURL}}/%3B/..%3B/host-manager/html"
+      - "{{BaseURL}}/host-manager/x/..%3B/html"
+      - "{{BaseURL}}/host-manager;X=Y/html"
+      - "{{BaseURL}}/manager/status"
+      - "{{BaseURL}}/..%3B/manager/status"
+      - "{{BaseURL}}/xx/..%3B/manager/status"
+      - "{{BaseURL}}/%3B/..%3B/manager/status"
+      - "{{BaseURL}}/manager/x/..;/status"
+      - "{{BaseURL}}/manager;X=Y/status"
+      - "{{BaseURL}}/manager/text"
+      - "{{BaseURL}}/..%3B/manager/text"
+      - "{{BaseURL}}/xx/..%3B/manager/text"
+      - "{{BaseURL}}/%3B/..%3B/manager/text"
+      - "{{BaseURL}}/manager/x/..;/text"
+      - "{{BaseURL}}/manager;X=Y/text"
+      - "{{BaseURL}}/WEB-INF/web.xml"
+      - "{{BaseURL}}/./WEB-INF/web.xml"
+      - "{{BaseURL}}/.//WEB-INF/web.xml"
+      - "{{BaseURL}}/docs/introduction.html"
+      - "{{BaseURL}}/examples/servlets"
+      - "{{BaseURL}}/test.jsp%01"
+      - "{{BaseURL}}:8080/manager/html"
+      - "{{BaseURL}}:8080/..%3B/manager/html"
+      - "{{BaseURL}}:8080/xx/..%3B/manager/html"
+      - "{{BaseURL}}:8080/%3B/..%3B/manager/html"
+      - "{{BaseURL}}:8080/manager/x/..;/html"
+      - "{{BaseURL}}:8080/manager;X=Y/html"
+      - "{{BaseURL}}:8080/host-manager/html"
+      - "{{BaseURL}}:8080/..%3B/host-manager/html"
+      - "{{BaseURL}}:8080/xx/..%3B/host-manager/html"
+      - "{{BaseURL}}:8080/%3B/..%3B/host-manager/html"
+      - "{{BaseURL}}:8080/host-manager/x/..%3B/html"
+      - "{{BaseURL}}:8080/host-manager;X=Y/html"
+      - "{{BaseURL}}:8080/manager/status"
+      - "{{BaseURL}}:8080/..%3B/manager/status"
+      - "{{BaseURL}}:8080/xx/..%3B/manager/status"
+      - "{{BaseURL}}:8080/%3B/..%3B/manager/status"
+      - "{{BaseURL}}:8080/manager/x/..;/status"
+      - "{{BaseURL}}:8080/manager;X=Y/status"
+      - "{{BaseURL}}:8080/manager/text"
+      - "{{BaseURL}}:8080/..%3B/manager/text"
+      - "{{BaseURL}}:8080/xx/..%3B/manager/text"
+      - "{{BaseURL}}:8080/%3B/..%3B/manager/text"
+      - "{{BaseURL}}:8080/manager/x/..;/text"
+      - "{{BaseURL}}:8080/manager;X=Y/text"
+      - "{{BaseURL}}:8080/WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/./WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/.//WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/docs/introduction.html"
+      - "{{BaseURL}}:8080/examples/servlets"
+      - "{{BaseURL}}:8080/test.jsp%01"
+    headers:
+      Authorization: Basic dG9tY2F0OnMzY3JldA==
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Apache Tomcat"
+          - "Tomcat Manager Application"
+          - "Host Manager"
+          - "<web-app"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Apache Tomcat"
+          - "Tomcat"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+
+  - method: GET
+    path:
+      - "{{BaseURL}}/manager/html"
+      - "{{BaseURL}}/..%3B/manager/html"
+      - "{{BaseURL}}/xx/..%3B/manager/html"
+      - "{{BaseURL}}/%3B/..%3B/manager/html"
+      - "{{BaseURL}}/manager/x/..;/html"
+      - "{{BaseURL}}/manager;X=Y/html"
+      - "{{BaseURL}}/host-manager/html"
+      - "{{BaseURL}}/..%3B/host-manager/html"
+      - "{{BaseURL}}/xx/..%3B/host-manager/html"
+      - "{{BaseURL}}/%3B/..%3B/host-manager/html"
+      - "{{BaseURL}}/host-manager/x/..%3B/html"
+      - "{{BaseURL}}/host-manager;X=Y/html"
+      - "{{BaseURL}}/manager/status"
+      - "{{BaseURL}}/..%3B/manager/status"
+      - "{{BaseURL}}/xx/..%3B/manager/status"
+      - "{{BaseURL}}/%3B/..%3B/manager/status"
+      - "{{BaseURL}}/manager/x/..;/status"
+      - "{{BaseURL}}/manager;X=Y/status"
+      - "{{BaseURL}}/manager/text"
+      - "{{BaseURL}}/..%3B/manager/text"
+      - "{{BaseURL}}/xx/..%3B/manager/text"
+      - "{{BaseURL}}/%3B/..%3B/manager/text"
+      - "{{BaseURL}}/manager/x/..;/text"
+      - "{{BaseURL}}/manager;X=Y/text"
+      - "{{BaseURL}}/WEB-INF/web.xml"
+      - "{{BaseURL}}/./WEB-INF/web.xml"
+      - "{{BaseURL}}/.//WEB-INF/web.xml"
+      - "{{BaseURL}}/docs/introduction.html"
+      - "{{BaseURL}}/examples/servlets"
+      - "{{BaseURL}}/test.jsp%01"
+      - "{{BaseURL}}:8080/manager/html"
+      - "{{BaseURL}}:8080/..%3B/manager/html"
+      - "{{BaseURL}}:8080/xx/..%3B/manager/html"
+      - "{{BaseURL}}:8080/%3B/..%3B/manager/html"
+      - "{{BaseURL}}:8080/manager/x/..;/html"
+      - "{{BaseURL}}:8080/manager;X=Y/html"
+      - "{{BaseURL}}:8080/host-manager/html"
+      - "{{BaseURL}}:8080/..%3B/host-manager/html"
+      - "{{BaseURL}}:8080/xx/..%3B/host-manager/html"
+      - "{{BaseURL}}:8080/%3B/..%3B/host-manager/html"
+      - "{{BaseURL}}:8080/host-manager/x/..%3B/html"
+      - "{{BaseURL}}:8080/host-manager;X=Y/html"
+      - "{{BaseURL}}:8080/manager/status"
+      - "{{BaseURL}}:8080/..%3B/manager/status"
+      - "{{BaseURL}}:8080/xx/..%3B/manager/status"
+      - "{{BaseURL}}:8080/%3B/..%3B/manager/status"
+      - "{{BaseURL}}:8080/manager/x/..;/status"
+      - "{{BaseURL}}:8080/manager;X=Y/status"
+      - "{{BaseURL}}:8080/manager/text"
+      - "{{BaseURL}}:8080/..%3B/manager/text"
+      - "{{BaseURL}}:8080/xx/..%3B/manager/text"
+      - "{{BaseURL}}:8080/%3B/..%3B/manager/text"
+      - "{{BaseURL}}:8080/manager/x/..;/text"
+      - "{{BaseURL}}:8080/manager;X=Y/text"
+      - "{{BaseURL}}:8080/WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/./WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/.//WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/docs/introduction.html"
+      - "{{BaseURL}}:8080/examples/servlets"
+      - "{{BaseURL}}:8080/test.jsp%01"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Apache Tomcat"
+          - "Tomcat Manager Application"
+          - "Host Manager"
+          - "<web-app"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Apache Tomcat"
+          - "Tomcat"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

@@ -1,0 +1,53 @@
+id: zabbix-misconfig
+info:
+  name: Zabbix Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Zabbix instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access or exploitation (e.g., CVE-2020-11800).
+  tags: zabbix, misconfiguration, cve
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/zabbix.php"
+      - "{{BaseURL}}/zabbix/zabbix.php"
+      - "{{BaseURL}}/zabbix.php?action=dashboard.list"
+      - "{{BaseURL}}/zabbix/zabbix.php?action=dashboard.list"
+      - "{{BaseURL}}/api_jsonrpc.php"
+      - "{{BaseURL}}/zabbix/api_jsonrpc.php"
+      - "{{BaseURL}}:8080/zabbix.php"
+      - "{{BaseURL}}:8080/zabbix/zabbix.php"
+      - "{{BaseURL}}:8080/zabbix.php?action=dashboard.list"
+      - "{{BaseURL}}:8080/zabbix/zabbix.php?action=dashboard.list"
+      - "{{BaseURL}}:8080/api_jsonrpc.php"
+      - "{{BaseURL}}:8080/zabbix/api_jsonrpc.php"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Zabbix"
+          - "Zabbix SIA"
+          - "Zabbix Monitoring"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Zabbix"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

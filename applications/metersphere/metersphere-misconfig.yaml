@@ -1,0 +1,42 @@
+id: kafka-misconfig
+info:
+  name: Apache Kafka Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Apache Kafka (Druid) instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access.
+  tags: kafka, druid, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/druid/indexer/v1/sampler?for=connect"
+      - "{{BaseURL}}:8080/druid/indexer/v1/sampler?for=connect"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Druid"
+          - "Kafka"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Druid"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

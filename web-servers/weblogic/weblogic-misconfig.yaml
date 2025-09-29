@@ -1,0 +1,56 @@
+id: weblogic-misconfig
+info:
+  name: WebLogic Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed WebLogic instances with accessible sensitive endpoints or vulnerable to file exposure.
+  tags: weblogic, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/wls-wsat/CoordinatorPortType"
+      - "{{BaseURL}}/ws_utc/config.do"
+      - "{{BaseURL}}/console/css/%252e%252e%252fconsole.portal"
+      - "{{BaseURL}}/uddiexplorer/SearchPublicRegistries.jsp"
+      - "{{BaseURL}}/.//META-INF/MANIFEST.MF"
+      - "{{BaseURL}}/.//WEB-INF/web.xml"
+      - "{{BaseURL}}/.//WEB-INF/portlet.xml"
+      - "{{BaseURL}}/.//WEB-INF/weblogic.xml"
+      - "{{BaseURL}}:7001/wls-wsat/CoordinatorPortType"
+      - "{{BaseURL}}:7001/ws_utc/config.do"
+      - "{{BaseURL}}:7001/console/css/%252e%252e%252fconsole.portal"
+      - "{{BaseURL}}:7001/uddiexplorer/SearchPublicRegistries.jsp"
+      - "{{BaseURL}}:7001/.//META-INF/MANIFEST.MF"
+      - "{{BaseURL}}:7001/.//WEB-INF/web.xml"
+      - "{{BaseURL}}:7001/.//WEB-INF/portlet.xml"
+      - "{{BaseURL}}:7001/.//WEB-INF/weblogic.xml"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "WebLogic"
+          - "Oracle WebLogic"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "WebLogic"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

@@ -1,0 +1,131 @@
+id: prototype-pollution
+info:
+  name: Prototype Pollution Detection
+  author: pwn
+  severity: critical
+  description: Detects Prototype Pollution vulnerabilities by sending payloads that manipulate Object.prototype or constructor.prototype in JavaScript applications, potentially leading to unauthorized behavior changes or data exposure.
+  tags: prototype-pollution, javascript, node-js, misconfiguration, rce
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/api?{{payload}}"
+      - "{{BaseURL}}/login?{{payload}}"
+      - "{{BaseURL}}/profile?{{payload}}"
+      - "{{BaseURL}}:8080/api?{{payload}}"
+      - "{{BaseURL}}:8080/login?{{payload}}"
+      - "{{BaseURL}}:8080/profile?{{payload}}"
+    payloads:
+      payload:
+        - "constructor.prototype.X=Y"
+        - "constructor[prototype][X]=Y"
+        - "__proto__.X=Y"
+        - "__proto__[X]=Y"
+        - "%22__proto__%22:%20{%22json%20spaces%22:10}"
+        - "%22constructor%22:%20{%22prototype%22:%20{%22json%20spaces%22:10}}"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "json spaces"
+          - "X=Y"
+          - "prototype"
+          - "error"
+          - "undefined"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "X-Powered-By: Express"
+          - "Node.js"
+        part: header
+        condition: or
+        case-insensitive: true
+      - type: regex
+        regex:
+          - "\"json spaces\":\\s*10"
+        part: body
+        condition: or
+      - type: word
+        words:
+          - "admin"
+          - "login"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+  - method: POST
+    path:
+      - "{{BaseURL}}/api"
+      - "{{BaseURL}}/login"
+      - "{{BaseURL}}/profile"
+      - "{{BaseURL}}:8080/api"
+      - "{{BaseURL}}:8080/login"
+      - "{{BaseURL}}:8080/profile"
+    headers:
+      Content-Type: application/json
+    body: |
+      {
+        {{payload}}
+      }
+    payloads:
+      payload:
+        - "\"__proto__\": {\"json spaces\":10}"
+        - "\"constructor\": {\"prototype\": {\"json spaces\":10}}"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "json spaces"
+          - "prototype"
+          - "error"
+          - "undefined"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "X-Powered-By: Express"
+          - "Node.js"
+        part: header
+        condition: or
+        case-insensitive: true
+      - type: regex
+        regex:
+          - "\"json spaces\":\\s*10"
+        part: body
+        condition: or
+      - type: word
+        words:
+          - "admin"
+          - "login"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+      - type: regex
+        name: response_data
+        part: body
+        regex:
+          - "(json spaces|X=Y|prototype)=[^&\\s\"']+"
+        group: 1

@@ -1,0 +1,45 @@
+id: manageengine-misconfig
+info:
+  name: ManageEngine Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed ManageEngine instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access or data exposure.
+  tags: manageengine, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/fosagent/repl/download-snapshot"
+      - "{{BaseURL}}/fosagent/repl/download-file"
+      - "{{BaseURL}}:8080/fosagent/repl/download-snapshot"
+      - "{{BaseURL}}:8080/fosagent/repl/download-file"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "ManageEngine"
+          - "ServiceDesk"
+          - "fosagent"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "ManageEngine"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

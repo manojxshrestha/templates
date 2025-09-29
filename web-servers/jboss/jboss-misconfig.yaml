@@ -1,0 +1,59 @@
+id: jboss-misconfig
+info:
+  name: JBoss Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed JBoss instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access or information disclosure (e.g., CVE-2017-12149).
+  tags: jboss, misconfiguration, cve
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/invoker/readonly"
+      - "{{BaseURL}}/jbossmq-httpil/HTTPServerILServlet"
+      - "{{BaseURL}}/invoker/JMXInvokerServlet"
+      - "{{BaseURL}}/jmx-console/HtmlAdaptor?action=inspectMBean&name=jboss.system:type=ServerInfo"
+      - "{{BaseURL}}/web-console/ServerInfo.jsp"
+      - "{{BaseURL}}/admin-console/"
+      - "{{BaseURL}}:8080/invoker/readonly"
+      - "{{BaseURL}}:8080/jbossmq-httpil/HTTPServerILServlet"
+      - "{{BaseURL}}:8080/invoker/JMXInvokerServlet"
+      - "{{BaseURL}}:8080/jmx-console/HtmlAdaptor?action=inspectMBean&name=jboss.system:type=ServerInfo"
+      - "{{BaseURL}}:8080/web-console/ServerInfo.jsp"
+      - "{{BaseURL}}:8080/admin-console/"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "JBoss"
+          - "JBossAS"
+          - "JMX"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Server: JBoss"
+        part: header
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "JBoss"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

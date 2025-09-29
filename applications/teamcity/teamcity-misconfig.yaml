@@ -1,0 +1,49 @@
+id: teamcity-misconfig
+info:
+  name: TeamCity Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed TeamCity instances with accessible sensitive endpoints, potentially vulnerable to unauthorized access or configuration exposure.
+  tags: teamcity, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/app/rest/users/id:1/tokens/RPC2"
+      - "{{BaseURL}}/hax?jsp=/app/rest/server;.jsp"
+      - "{{BaseURL}}/res/../admin/diagnostic.jsp"
+      - "{{BaseURL}}/.well-known/acme-challenge/../../admin/diagnostic.jsp"
+      - "{{BaseURL}}/update/../admin/diagnostic.jsp"
+      - "{{BaseURL}}:8111/app/rest/users/id:1/tokens/RPC2"
+      - "{{BaseURL}}:8111/hax?jsp=/app/rest/server;.jsp"
+      - "{{BaseURL}}:8111/res/../admin/diagnostic.jsp"
+      - "{{BaseURL}}:8111/.well-known/acme-challenge/../../admin/diagnostic.jsp"
+      - "{{BaseURL}}:8111/update/../admin/diagnostic.jsp"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "TeamCity"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "TeamCity"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

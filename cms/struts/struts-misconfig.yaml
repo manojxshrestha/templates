@@ -1,0 +1,70 @@
+id: struts-misconfig
+info:
+  name: Apache Struts 2 Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed Apache Struts 2 instances with accessible sensitive endpoints or default configurations, potentially vulnerable to remote code execution (e.g., CVE-2017-5638, CVE-2018-11776).
+  tags: struts, struts2, misconfiguration, cve, rce
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/showcase.action"
+      - "{{BaseURL}}/viewSource.action"
+      - "{{BaseURL}}/showcase/"
+      - "{{BaseURL}}/struts/webconsole.html"
+      - "{{BaseURL}}/struts2-showcase/struts/utils.js"
+      - "{{BaseURL}}/showcase.action?debug=command"
+      - "{{BaseURL}}/viewSource.action?debug=command"
+      - "{{BaseURL}}/index.do"
+      - "{{BaseURL}}/index.go"
+      - "{{BaseURL}}/index.action"
+      - "{{BaseURL}}:8080/showcase.action"
+      - "{{BaseURL}}:8080/viewSource.action"
+      - "{{BaseURL}}:8080/showcase/"
+      - "{{BaseURL}}:8080/struts/webconsole.html"
+      - "{{BaseURL}}:8080/struts2-showcase/struts/utils.js"
+      - "{{BaseURL}}:8080/showcase.action?debug=command"
+      - "{{BaseURL}}:8080/viewSource.action?debug=command"
+      - "{{BaseURL}}:8080/index.do"
+      - "{{BaseURL}}:8080/index.go"
+      - "{{BaseURL}}:8080/index.action"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "Struts"
+          - "Struts2"
+          - "Apache Struts"
+          - "/struts/utils.js"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: regex
+        name: title-match
+        regex:
+          - "(?i)<title>Showcase</title>"
+          - "(?i)<title>Struts2 Showcase</title>"
+          - "(?i)<title>Struts2 jQuery Plugin Showcase</title>"
+        part: body
+        condition: or
+      - type: word
+        words:
+          - "Struts"
+          - "OGNL"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 404
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

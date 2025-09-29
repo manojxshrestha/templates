@@ -1,0 +1,56 @@
+id: wordpress-misconfig
+info:
+  name: WordPress Misconfiguration Detection
+  author: pwn
+  severity: high
+  description: Detects exposed WordPress instances with accessible sensitive endpoints or configuration files, potentially vulnerable to unauthorized access or information disclosure.
+  tags: wordpress, misconfiguration
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/wp-login.php"
+      - "{{BaseURL}}/wp-config.php.bak"
+      - "{{BaseURL}}/xmlrpc.php"
+      - "{{BaseURL}}/wp-cron.php"
+      - "{{BaseURL}}/wp-content/debug.log"
+      - "{{BaseURL}}/wp-config.php.save"
+      - "{{BaseURL}}/wp-json/wp/v2/pages"
+      - "{{BaseURL}}/wp-json/wp/v2/posts"
+      - "{{BaseURL}}:8080/wp-login.php"
+      - "{{BaseURL}}:8080/wp-config.php.bak"
+      - "{{BaseURL}}:8080/xmlrpc.php"
+      - "{{BaseURL}}:8080/wp-cron.php"
+      - "{{BaseURL}}:8080/wp-content/debug.log"
+      - "{{BaseURL}}:8080/wp-config.php.save"
+      - "{{BaseURL}}:8080/wp-json/wp/v2/pages"
+      - "{{BaseURL}}:8080/wp-json/wp/v2/posts"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "WordPress"
+          - "wp-content"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "WordPress"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: status
+        status:
+          - 403
+          - 401
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1

